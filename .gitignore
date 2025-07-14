@@ -1,0 +1,15 @@
+# Dependencies in any folder
+node_modules/
+
+# Build output from the frontend
+front-end/dist/
+
+# Environment files (NEVER commit these)
+.env
+back-end/.env
+front-end/.env*
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
