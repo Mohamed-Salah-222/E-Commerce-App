@@ -12,6 +12,9 @@ import OrderHistoryPage from "./components/OrderHistoryPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import VerifyPage from "./components/VerifyPage";
 import Notification from "./components/Notification";
+import ForgotPasswordPage from "./components/ForgotPasswordPage";
+import ResetPasswordPage from "./components/ResetPasswordPage";
+import GoogleAuthCallbackPage from "./components/GoogleAuthCallbackPage";
 
 function App() {
   const { user, logout } = useAuth();
@@ -84,6 +87,9 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email" element={<VerifyPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password/:userId/:token" element={<ResetPasswordPage />} />
+          <Route path="/auth/google/callback" element={<GoogleAuthCallbackPage />} />
           <Route
             path="/cart"
             element={

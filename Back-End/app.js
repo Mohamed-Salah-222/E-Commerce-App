@@ -8,7 +8,8 @@ const path = require("path");
 const multer = require("multer");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { sendVerificationEmail } = require("./services/emailServices");
+const { sendVerificationEmail, sendPasswordResetEmail } = require("./services/emailServices");
+const passport = require("passport");
 
 // --- Import All Models & Middleware ---
 const User = require("./models/user");
@@ -16,6 +17,7 @@ const Product = require("./models/product");
 const Cart = require("./models/cart");
 const Order = require("./models/order");
 const authMiddleware = require("./middleware/authMiddleware");
+require("./config/passport-setup");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -24,6 +26,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(passport.initialize());
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -169,6 +172,65 @@ app.post("/api/products", upload.single("productImage"), async (req, res) => {
     res.status(201).json(savedProduct);
   } catch (error) {
     res.status(500).json({ message: "Server error while creating product." });
+  }
+});
+
+app.post("/api/auth/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      console.log(`Password reset requested for non-existent user: ${email}`);
+      return res.status(200).json({ message: "If an account with that email exists, a password reset link has been sent." });
+    }
+
+    const resetSecret = process.env.JWT_SECRET + user.password;
+    const payload = { email: user.email, id: user._id };
+
+    const token = jwt.sign(payload, resetSecret, { expiresIn: "15m" });
+
+    await sendPasswordResetEmail(user.email, user._id, token);
+
+    res.status(200).json({ message: "If an account with that email exists, a password reset link has been sent." });
+  } catch (error) {
+    console.error("Error in forgot password process:", error);
+
+    res.status(500).json({ message: "An error occurred. Please try again later." });
+  }
+});
+
+app.post("/api/auth/reset-password/:userId/:token", async (req, res) => {
+  try {
+    const { userId, token } = req.params;
+    const { password } = req.body;
+
+    if (!password || password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters long." });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const resetSecret = process.env.JWT_SECRET + user.password;
+
+    jwt.verify(token, resetSecret);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password has been reset successfully." });
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    res.status(400).json({ message: "Invalid or expired password reset link." });
   }
 });
 
@@ -359,6 +421,32 @@ app.patch("/api/cart/promo", authMiddleware, async (req, res) => {
     console.error("Error applying promo code:", error);
     res.status(500).json({ message: "Server error while applying promo code." });
   }
+});
+
+app.get(
+  "/api/auth/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"], // We ask for the user's profile and email
+    session: false, // We are using JWTs, so we don't need sessions
+  })
+);
+
+// This is the callback route that Google will redirect to after the user logs in.
+app.get("/api/auth/google/callback", passport.authenticate("google", { session: false, failureRedirect: "/login" }), (req, res) => {
+  // If authentication is successful, passport attaches the user to req.user.
+  // Now, we can create a JWT for this user, just like in our regular login.
+  const payload = {
+    userId: req.user._id,
+    email: req.user.email,
+    username: req.user.username,
+  };
+
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+  // This part is tricky. We need to send the token back to the frontend.
+  // A common way is to redirect back to the frontend with the token in the URL.
+  // For now, we'll just send it back as JSON. The frontend would need to handle this.
+  res.redirect(`http://localhost:5173/auth/google/callback?token=${token}`);
 });
 
 // --- Database Connection & Server Start ---
