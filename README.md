@@ -7,7 +7,7 @@ A complete, feature-rich e-commerce application built from scratch with a modern
 </p>
 
 <p align="center">
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/status-complete-green%3Fstyle%3Dfor-the-badge" alt="Status Complete"/>
+<strong>Status:</strong> Complete
 </p>
 
 ✨ Key Features
@@ -41,31 +41,12 @@ A complete, feature-rich e-commerce application built from scratch with a modern
 </table>
 
 🛠️ Tech Stack
+Frontend: React, React Router, Tailwind CSS
 
-<p align="left">
-<strong>Frontend:</strong>&nbsp;
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/React-20232A%3Fstyle%3Dfor-the-badge%26logo%3Dreact%26logoColor%3D61DAFB" alt="React"/>
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/React_Router-CA4245%3Fstyle%3Dfor-the-badge%26logo%3Dreact-router%26logoColor%3Dwhite" alt="React Router"/>
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/Tailwind_CSS-38B2AC%3Fstyle%3Dfor-the-badge%26logo%3Dtailwind-css%26logoColor%3Dwhite" alt="Tailwind CSS"/>
-</p>
-<p align="left">
-<strong>Backend:</strong>&nbsp;
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/Node.js-339933%3Fstyle%3Dfor-the-badge%26logo%3Dnodedotjs%26logoColor%3Dwhite" alt="Node.js"/>
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/Express.js-000000%3Fstyle%3Dfor-the-badge%26logo%3Dexpress%26logoColor%3Dwhite" alt="Express.js"/>
-</p>
-<p align="left">
-<strong>Database:</strong>&nbsp;
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/MongoDB-4EA94B%3Fstyle%3Dfor-the-badge%26logo%3Dmongodb%26logoColor%3Dwhite" alt="MongoDB"/>
-</p>
-<p align="left">
-<strong>Authentication:</strong>&nbsp;
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/JWT-000000%3Fstyle%3Dfor-the-badge%26logo%3Djsonwebtokens%26logoColor%3Dwhite" alt="JWT"/>
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/Bcrypt-6679A3%3Fstyle%3Dfor-the-badge" alt="Bcrypt"/>
-</p>
-<p align="left">
-<strong>Tools & Deployment:</strong>&nbsp;
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/GIT-E44C30%3Fstyle%3Dfor-the-badge%26logo%3Dgit%26logoColor%3Dwhite" alt="Git"/>
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/Postman-FF6C37%3Fstyle%3Dfor-the-badge%26logo%3Dpostman%26logoColor%3Dwhite" alt="Postman"/>
-<img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel"/>
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/Render-46E3B7%3Fstyle%3Dfor-the-badge%26logo%3Drender%26logoColor%3Dwhite" alt="Render"/>
-</p>
+Backend: Node.js, Express.js
+
+Database: MongoDB
+
+Authentication: JWT, Bcrypt
+
+Tools & Deployment: Git, Postman, Vercel, Render
