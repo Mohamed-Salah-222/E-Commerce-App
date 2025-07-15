@@ -1,5 +1,3 @@
-// app.js - Final Version with all routes
-
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -11,7 +9,6 @@ const jwt = require("jsonwebtoken");
 const { sendVerificationEmail, sendPasswordResetEmail } = require("./services/emailServices");
 const passport = require("passport");
 
-// --- Import All Models & Middleware ---
 const User = require("./models/user");
 const Product = require("./models/product");
 const Cart = require("./models/cart");
@@ -22,7 +19,6 @@ require("./config/passport-setup");
 const app = express();
 const port = process.env.PORT || 3000;
 
-// --- Middleware ---
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
@@ -41,9 +37,6 @@ const upload = multer({ storage: storage });
 
 const dbURI = process.env.MONGODB_URI;
 
-// --- API ROUTES ---
-
-// --- AUTH ROUTES ---
 app.post("/api/auth/register", async (req, res) => {
   try {
     const { email, password, username } = req.body;
@@ -154,7 +147,6 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-// --- PRODUCT ROUTES ---
 app.post("/api/products", upload.single("productImage"), async (req, res) => {
   try {
     const { name, description, price, sizes, colors } = req.body;
@@ -256,7 +248,6 @@ app.get("/api/products/:id", async (req, res) => {
   }
 });
 
-// --- CART & ORDER ROUTES (The final piece) ---
 app.get("/api/cart", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -307,7 +298,7 @@ app.delete("/api/cart/items/:productId", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId;
     const productIdToRemove = req.params.productId;
-    // Get size and color from the URL's query string
+
     const { size, color } = req.query;
 
     const cart = await Cart.findOne({ userId });
@@ -316,7 +307,6 @@ app.delete("/api/cart/items/:productId", authMiddleware, async (req, res) => {
       return res.status(404).json({ message: "Cart not found." });
     }
 
-    // Filter items, keeping everything that does NOT match
     cart.items = cart.items.filter((item) => !(item.productId.toString() === productIdToRemove && item.size === size && item.color === color));
 
     const updatedCart = await cart.save();
@@ -338,16 +328,12 @@ app.post("/api/orders", authMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Cannot create an order with an empty cart." });
     }
 
-    // --- THIS IS THE CRUCIAL FIX ---
-    // We first filter the cart items to only include valid ones where the product exists.
     const validItems = cart.items.filter((item) => item.productId);
 
     if (validItems.length === 0) {
       return res.status(400).json({ message: "Cart contains no valid items to order." });
     }
-    // --- END OF FIX ---
 
-    // Now, we use the 'validItems' array for all calculations and for creating the order.
     const totalAmount = validItems.reduce((total, item) => {
       return total + item.quantity * item.productId.price;
     }, 0);
@@ -360,7 +346,7 @@ app.post("/api/orders", authMiddleware, async (req, res) => {
 
     const newOrder = new Order({
       userId: userId,
-      // We map over 'validItems' now, not 'cart.items'
+
       products: validItems.map((item) => ({
         productId: item.productId._id,
         quantity: item.quantity,
@@ -376,7 +362,6 @@ app.post("/api/orders", authMiddleware, async (req, res) => {
 
     const savedOrder = await newOrder.save();
 
-    // Clear the cart completely
     cart.items = [];
     cart.promoCode = "";
     await cart.save();
@@ -385,6 +370,42 @@ app.post("/api/orders", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error creating order:", error);
     res.status(500).json({ message: "Server error while creating order." });
+  }
+});
+
+app.put("/api/user/profile", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const { username, phone, address } = req.body;
+
+    const userToUpdate = await User.findById(userId);
+
+    if (!userToUpdate) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (username) userToUpdate.username = username;
+    if (phone) userToUpdate.phone = phone;
+    if (address) userToUpdate.address = address;
+
+    const updatedUser = await userToUpdate.save();
+
+    const userResponse = {
+      _id: updatedUser._id,
+      username: updatedUser.username,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      address: updatedUser.address,
+    };
+
+    res.status(200).json({
+      message: "Profile updated successfully!",
+      user: userResponse,
+    });
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    res.status(500).json({ message: "Server error while updating profile." });
   }
 });
 
@@ -398,7 +419,6 @@ app.get("/api/orders", authMiddleware, async (req, res) => {
   }
 });
 
-// PATCH /api/cart/promo - Apply a promo code to the cart
 app.patch("/api/cart/promo", authMiddleware, async (req, res) => {
   try {
     const { promoCode } = req.body;
@@ -408,8 +428,6 @@ app.patch("/api/cart/promo", authMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Promo code must be a string." });
     }
 
-    // Find the user's cart and update the promoCode field
-    // { new: true } ensures the updated document is returned
     const cart = await Cart.findOneAndUpdate({ userId }, { promoCode: promoCode.toUpperCase() }, { new: true }).populate("items.productId");
 
     if (!cart) {
@@ -426,15 +444,12 @@ app.patch("/api/cart/promo", authMiddleware, async (req, res) => {
 app.get(
   "/api/auth/google",
   passport.authenticate("google", {
-    scope: ["profile", "email"], // We ask for the user's profile and email
-    session: false, // We are using JWTs, so we don't need sessions
+    scope: ["profile", "email"],
+    session: false,
   })
 );
 
-// This is the callback route that Google will redirect to after the user logs in.
 app.get("/api/auth/google/callback", passport.authenticate("google", { session: false, failureRedirect: "/login" }), (req, res) => {
-  // If authentication is successful, passport attaches the user to req.user.
-  // Now, we can create a JWT for this user, just like in our regular login.
   const payload = {
     userId: req.user._id,
     email: req.user.email,
@@ -443,13 +458,53 @@ app.get("/api/auth/google/callback", passport.authenticate("google", { session: 
 
   const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-  // This part is tricky. We need to send the token back to the frontend.
-  // A common way is to redirect back to the frontend with the token in the URL.
-  // For now, we'll just send it back as JSON. The frontend would need to handle this.
   res.redirect(`http://localhost:5173/auth/google/callback?token=${token}`);
 });
 
-// --- Database Connection & Server Start ---
+app.get("/api/user/me", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ message: "Server error while fetching profile." });
+  }
+});
+
+app.put("/api/user/address", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const { street, city, postalCode, country } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    user.address = {
+      street,
+      city,
+      postalCode,
+      country,
+    };
+
+    const updatedUser = await user.save();
+
+    res.status(200).json({
+      message: "Address updated successfully!",
+      address: updatedUser.address,
+    });
+  } catch (error) {
+    console.error("Error updating user address:", error);
+    res.status(500).json({ message: "Server error while updating address." });
+  }
+});
+
 mongoose
   .connect(dbURI)
   .then(() => {

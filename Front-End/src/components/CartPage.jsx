@@ -55,25 +55,41 @@ function CartPage() {
       });
       if (!response.ok) throw new Error("Failed to remove item");
       showNotification("Item removed from cart.", "success");
-      fetchCart(); // Re-fetch to update UI
+      fetchCart();
     } catch (error) {
       showNotification("Error removing item.", "error");
       console.error("Error removing item:", error);
     }
   };
 
+  // --- UPDATED CHECKOUT LOGIC ---
   const handleCheckout = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
-        method: "POST",
+      // 1. First, fetch the user's full profile to check for an address
+      const userResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/user/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create order.");
+      if (!userResponse.ok) throw new Error("Could not verify user details.");
+      const userData = await userResponse.json();
+
+      // 2. Check if the user has a complete address saved
+      const hasAddress = userData.address && userData.address.street && userData.address.city;
+
+      if (hasAddress) {
+        // 3a. If they have an address, create the order directly
+        const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!orderResponse.ok) {
+          throw new Error("Failed to create order.");
+        }
+        showNotification("Order placed successfully! Redirecting...", "success");
+        navigate("/orders");
+      } else {
+        // 3b. If they DON'T have an address, navigate to the checkout page to add one
+        navigate("/checkout");
       }
-      showNotification("Order placed successfully!", "success");
-      navigate("/orders");
     } catch (error) {
       showNotification(error.message, "error");
       console.error("Checkout error:", error);
@@ -98,7 +114,7 @@ function CartPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to apply promo code");
 
-      setCart(data); // Update the cart state with the response
+      setCart(data);
       if (data.promoCode === "CROW10") {
         setPromoMessage("Promo applied! 10% discount.");
       } else {
@@ -114,33 +130,34 @@ function CartPage() {
   if (loading) return <div className="text-center p-10">Loading your cart...</div>;
 
   const validItems = cart ? cart.items.filter((item) => item.productId) : [];
-  const cartTotal = validItems.reduce((total, item) => total + item.quantity * item.productId.price, 0);
-  const discountAmount = cart?.promoCode === "CROW10" ? cartTotal * 0.1 : 0;
-  const discountedTotal = cartTotal - discountAmount;
 
   if (!cart || validItems.length === 0) {
     return (
       <div className="text-center p-10 space-y-4">
         <h1 className="text-3xl font-bold">Your Cart is Empty</h1>
         <p className="text-gray-500">Looks like you haven't added anything to your cart yet.</p>
-        <Link to="/" className="inline-block bg-indigo-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-indigo-700">
+        <Link to="/" className="inline-block bg-indigo-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-indigo-700">
           Start Shopping
         </Link>
       </div>
     );
   }
 
+  const cartTotal = validItems.reduce((total, item) => total + item.quantity * item.productId.price, 0);
+  const discountAmount = cart?.promoCode === "CROW10" ? cartTotal * 0.1 : 0;
+  const discountedTotal = cartTotal - discountAmount;
+
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
+      <h1 className="text-4xl font-bold mb-8 text-gray-800">Shopping Cart</h1>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Cart Items List */}
         <div className="lg:col-span-2 space-y-4">
           {validItems.map((item) => (
-            <div key={item.productId._id + item.size + item.color} className="flex items-center bg-white p-4 rounded-xl shadow-md">
-              <img src={item.productId.imageUrl} alt={item.productId.name} className="w-24 h-24 object-contain rounded-lg mr-4 bg-gray-100" />
+            <div key={item.productId._id + item.size + item.color} className="flex items-center bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+              <img src={item.productId.imageUrl} alt={item.productId.name} className="w-24 h-24 object-contain rounded-lg mr-6 bg-gray-100 p-1" />
               <div className="flex-grow">
-                <h2 className="text-lg font-semibold">{item.productId.name}</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{item.productId.name}</h2>
                 <p className="text-sm text-gray-500">
                   {item.size && `Size: ${item.size}`}
                   {item.size && item.color && ", "}
@@ -150,7 +167,7 @@ function CartPage() {
               </div>
               <div className="text-right">
                 <p className="text-lg font-bold text-gray-800">${(item.quantity * item.productId.price).toFixed(2)}</p>
-                <button onClick={() => handleRemoveItem(item)} className="text-xs text-red-500 hover:text-red-700 font-medium mt-1">
+                <button onClick={() => handleRemoveItem(item)} className="text-xs text-red-500 hover:text-red-700 font-medium mt-1 hover:underline">
                   Remove
                 </button>
               </div>
@@ -160,7 +177,7 @@ function CartPage() {
 
         {/* Order Summary Card */}
         <div className="lg:col-span-1">
-          <div className="bg-white p-6 rounded-xl shadow-lg sticky top-24">
+          <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-6 sticky top-24">
             <h2 className="text-xl font-bold mb-4 border-b pb-4">Order Summary</h2>
             <div className="space-y-2 text-gray-700">
               <div className="flex justify-between">
@@ -168,12 +185,12 @@ function CartPage() {
                 <span>${cartTotal.toFixed(2)}</span>
               </div>
               {discountAmount > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-green-600 font-medium">
                   <span>Discount (10%)</span>
                   <span>-${discountAmount.toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between font-bold text-lg border-t pt-4 mt-4">
+              <div className="flex justify-between font-bold text-xl border-t pt-4 mt-4">
                 <span>Total</span>
                 <span>${discountedTotal.toFixed(2)}</span>
               </div>
@@ -182,15 +199,15 @@ function CartPage() {
             <div className="mt-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">Promo Code</label>
               <div className="flex space-x-2">
-                <input type="text" value={promoCode} onChange={(e) => setPromoCode(e.target.value)} className="w-full p-2 border rounded-md" placeholder="CROW10" />
-                <button onClick={handleApplyPromoCode} className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900">
+                <input type="text" value={promoCode} onChange={(e) => setPromoCode(e.target.value)} className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="CROW10" />
+                <button onClick={handleApplyPromoCode} className="px-4 py-2 bg-gray-800 text-white rounded-xl hover:bg-gray-900 transition-colors">
                   Apply
                 </button>
               </div>
               {promoMessage && <p className={`mt-2 text-xs ${discountAmount > 0 ? "text-green-600" : "text-red-600"}`}>{promoMessage}</p>}
             </div>
 
-            <button onClick={handleCheckout} className="w-full mt-6 py-3 font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg hover:opacity-90 transition-opacity">
+            <button onClick={handleCheckout} className="w-full mt-6 py-3 font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl hover:opacity-90 transition-opacity shadow-lg">
               Proceed to Checkout
             </button>
           </div>

@@ -1,8 +1,6 @@
-// E-commerce project's src/App.jsx (Updated)
 import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
-// Import all your page components
 import HomePage from "./components/HomePage";
 import ProductDetailPage from "./components/ProductDetailPage";
 import RegisterPage from "./components/RegisterPage";
@@ -15,6 +13,8 @@ import Notification from "./components/Notification";
 import ForgotPasswordPage from "./components/ForgotPasswordPage";
 import ResetPasswordPage from "./components/ResetPasswordPage";
 import GoogleAuthCallbackPage from "./components/GoogleAuthCallbackPage";
+import CheckoutPage from "./components/CheckoutPage";
+import UserProfilePage from "./components/UserProfilePage";
 
 function App() {
   const { user, logout } = useAuth();
@@ -28,11 +28,10 @@ function App() {
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
       <Notification />
-      {/* --- NEW, POLISHED NAVIGATION BAR --- */}
+
       <nav className="bg-white shadow-md sticky top-0 z-10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Left Side: Logo and Main Links */}
             <div className="flex items-center space-x-8">
               <Link to="/" className="text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
                 E-Store
@@ -44,11 +43,12 @@ function App() {
               </div>
             </div>
 
-            {/* Right Side: User Auth & Cart Links */}
             <div className="flex items-center space-x-4">
               {user ? (
-                // If user IS logged in
                 <>
+                  <Link to="/profile" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                    My Profile
+                  </Link>
                   <Link to="/cart" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
                     My Cart
                   </Link>
@@ -64,7 +64,6 @@ function App() {
                   </button>
                 </>
               ) : (
-                // If user is NOT logged in
                 <>
                   <Link to="/register" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
                     Register
@@ -79,7 +78,6 @@ function App() {
         </div>
       </nav>
 
-      {/* Main content area */}
       <main className="container mx-auto p-4 md:p-8">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -103,6 +101,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <OrderHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <UserProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/checkout"
+            element={
+              <ProtectedRoute>
+                <CheckoutPage />
               </ProtectedRoute>
             }
           />
