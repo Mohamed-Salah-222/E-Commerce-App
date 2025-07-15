@@ -38,7 +38,7 @@ function HomePage() {
   const reviews = [
     {
       name: "Sarah A.",
-      message: "Amazing products and super fast delivery!",
+      message: "Amazing products and super fast delivery! 💖💖",
     },
     {
       name: "Mohamed E.",
@@ -55,41 +55,50 @@ function HomePage() {
   }
 
   return (
-    <div>
-      {/* The search and sort UI */}
-      <div className="flex items-center justify-center md:justify-between mb-8 gap-4 px-4">
-        <div className="hidden md:block w-48"></div>
-        <div className="flex-grow max-w-lg">
-          <input type="text" placeholder="Search for products..." className="w-full p-3 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-        </div>
-        <div className="w-48 flex justify-end">
-          <select className="p-3 border border-gray-300 rounded-lg shadow-sm bg-white focus:outline-none" value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
-            <option value="newest">Sort by Newest</option>
-            <option value="price_asc">Price: Low to High</option>
-            <option value="price_desc">Price: High to Low</option>
-          </select>
+    <div className="space-y-20">
+      {/* --- Hero Section --- */}
+      <div className="text-center py-20 px-4 bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-2xl shadow-sm">
+        <h1 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Find Your Perfect Style</h1>
+        <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">Browse our curated collection of high-quality apparel and accessories.</p>
+        <div className="mt-8">
+          <input type="text" placeholder="Search all products..." className="w-full max-w-xl p-4 border border-gray-200 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
       </div>
 
-      {/* Product List */}
-      <ProductList products={displayedProducts} />
+      {/* --- Main Products Section --- */}
+      <div>
+        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+          <h2 className="text-3xl font-bold text-gray-800">Our Collection</h2>
+          <div className="flex items-center gap-4">
+            <label htmlFor="sort" className="text-sm font-medium text-gray-700">
+              Sort by:
+            </label>
+            <select id="sort" className="p-2 border border-gray-300 rounded-lg shadow-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500" value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
+              <option value="newest">Newest</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+            </select>
+          </div>
+        </div>
+        <ProductList products={displayedProducts} />
+      </div>
 
-      {/* Promo Code Section */}
-      <div className="bg-indigo-50 mt-16 py-8 px-4 text-center rounded-lg max-w-4xl mx-auto">
-        <h2 className="text-xl md:text-2xl font-semibold text-indigo-800 mb-2">🎉 Special Offer!</h2>
-        <p className="text-gray-700">
-          Use promo code <span className="font-bold text-indigo-600">CROW10</span> at checkout and get <span className="font-bold">10% OFF</span> your entire order!
+      {/* --- Promo Code Section --- */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 mt-16 py-12 px-6 text-center rounded-2xl shadow-lg">
+        <h2 className="text-3xl font-bold text-white mb-2">🎉 Get 10% Off!</h2>
+        <p className="text-indigo-100 text-lg">
+          Use promo code <span className="font-bold text-white bg-white/20 px-2 py-1 rounded">CROW10</span> at checkout for a special discount!
         </p>
       </div>
 
-      {/* Customer Reviews Section */}
-      <div className="mt-12 max-w-6xl mx-auto px-4">
-        <h2 className="text-2xl font-bold mb-6 text-center">What Our Customers Say</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* --- Customer Reviews Section --- */}
+      <div className="mt-16 max-w-7xl mx-auto px-4">
+        <h2 className="text-3xl font-bold mb-10 text-center text-gray-800">What Our Customers Say</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {reviews.map((review, index) => (
-            <div key={index} className="bg-white p-6 rounded-lg shadow-md">
-              <p className="text-gray-700 mb-4">"{review.message}"</p>
-              <p className="text-sm font-semibold text-indigo-700">– {review.name}</p>
+            <div key={index} className="bg-white p-6 rounded-xl shadow-md border-t-4 border-indigo-500 transform hover:scale-105 transition-transform duration-300">
+              <p className="text-gray-700 mb-4 italic text-lg">"{review.message}"</p>
+              <p className="text-md font-semibold text-gray-900 text-right">– {review.name}</p>
             </div>
           ))}
         </div>
