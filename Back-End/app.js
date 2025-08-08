@@ -460,7 +460,7 @@ app.get("/api/auth/google/callback", passport.authenticate("google", { session: 
   const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
   // Redirect to your deployed frontend
-  res.redirect(`https://e-commerce-orfgivnf8-silvercrows-projects.vercel.app/auth/google/callback?token=${token}`);
+  res.redirect(`https://e-commerce-app-neon-eight.vercel.app/auth/google/callback?token=${token}`);
 });
 
 app.get("/api/user/me", authMiddleware, async (req, res) => {
