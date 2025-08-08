@@ -15,6 +15,7 @@ import ResetPasswordPage from "./components/ResetPasswordPage";
 import GoogleAuthCallbackPage from "./components/GoogleAuthCallbackPage";
 import CheckoutPage from "./components/CheckoutPage";
 import UserProfilePage from "./components/UserProfilePage";
+import PaymentPopup from "./components/PaymentPopup";
 
 function App() {
   const { user, logout } = useAuth();

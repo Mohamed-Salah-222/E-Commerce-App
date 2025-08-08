@@ -54,6 +54,38 @@ const orderSchema = new Schema(
       type: String,
       default: null,
     },
+
+    // Payment-related fields
+    paymentIntentId: {
+      type: String,
+      required: true,
+    },
+
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "succeeded", "failed", "canceled"],
+      default: "pending",
+    },
+
+    paymentMethod: {
+      type: String,
+      default: "card",
+    },
+
+    // Shipping address (snapshot at time of order)
+    shippingAddress: {
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      postalCode: { type: String, required: true },
+      country: { type: String, required: true },
+      phone: { type: String, required: true },
+    },
+
+    orderStatus: {
+      type: String,
+      enum: ["processing", "shipped", "delivered", "cancelled"],
+      default: "processing",
+    },
   },
   { timestamps: true }
 );

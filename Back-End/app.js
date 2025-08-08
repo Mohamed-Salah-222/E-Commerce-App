@@ -8,6 +8,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { sendVerificationEmail, sendPasswordResetEmail } = require("./services/emailServices");
 const passport = require("passport");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const User = require("./models/user");
 const Product = require("./models/product");
@@ -502,6 +503,180 @@ app.put("/api/user/address", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error updating user address:", error);
     res.status(500).json({ message: "Server error while updating address." });
+  }
+});
+
+app.post("/api/create-payment-intent", authMiddleware, async (req, res) => {
+  try {
+    const { shippingAddress } = req.body;
+    const userId = req.user.userId;
+
+    // Validate shipping address
+    if (!shippingAddress || !shippingAddress.street || !shippingAddress.city || !shippingAddress.postalCode || !shippingAddress.country || !shippingAddress.phone) {
+      return res.status(400).json({ error: "Complete shipping address is required" });
+    }
+
+    // Debug: Log userId to ensure it's correct
+    console.log("Looking for cart with userId:", userId);
+    console.log("userId type:", typeof userId);
+
+    // Fetch user's cart
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
+
+    // Debug: Log the cart result
+    console.log("Cart found:", cart);
+    console.log("Cart items:", cart?.items);
+    console.log("Cart items length:", cart?.items?.length);
+
+    if (!cart) {
+      return res.status(400).json({ error: "No cart found for user" });
+    }
+
+    if (!cart.items || cart.items.length === 0) {
+      return res.status(400).json({ error: "Cart is empty" });
+    }
+
+    // Debug: Log each item
+    cart.items.forEach((item, index) => {
+      console.log(`Item ${index}:`, {
+        productId: item.productId,
+        quantity: item.quantity,
+        productExists: !!item.productId,
+      });
+    });
+
+    // Filter valid items and calculate totals
+    const validItems = cart.items.filter((item) => item.productId);
+    console.log("Valid items count:", validItems.length);
+
+    if (validItems.length === 0) {
+      return res.status(400).json({ error: "No valid items in cart" });
+    }
+
+    const cartTotal = validItems.reduce((total, item) => total + item.quantity * item.productId.price, 0);
+
+    const discountAmount = cart.promoCode === "CROW10" ? cartTotal * 0.1 : 0;
+    const discountedTotal = cartTotal - discountAmount;
+
+    // Create payment intent
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(discountedTotal * 100), // Convert to cents
+      currency: "usd",
+      metadata: {
+        userId: userId.toString(),
+        itemCount: validItems.length.toString(),
+        promoCode: cart.promoCode || "",
+      },
+    });
+
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      amount: discountedTotal,
+    });
+  } catch (error) {
+    console.error("Payment intent creation error:", error);
+    res.status(500).json({ error: "Payment creation failed" });
+  }
+});
+
+// Confirm payment and create order
+app.post("/api/confirm-payment", authMiddleware, async (req, res) => {
+  try {
+    const { paymentIntentId, shippingAddress } = req.body;
+    const userId = req.user.userId;
+
+    if (!paymentIntentId || !shippingAddress) {
+      return res.status(400).json({ error: "Payment ID and shipping address are required" });
+    }
+
+    // Verify payment with Stripe
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    if (paymentIntent.status !== "succeeded") {
+      return res.status(400).json({ error: "Payment not successful" });
+    }
+
+    // Verify the payment belongs to this user
+    if (paymentIntent.metadata.userId !== userId.toString()) {
+      return res.status(403).json({ error: "Payment verification failed" });
+    }
+
+    // Check if order already exists (prevent duplicate orders)
+    const existingOrder = await Order.findOne({ paymentIntentId });
+    if (existingOrder) {
+      return res.status(400).json({ error: "Order already exists for this payment" });
+    }
+
+    // Fetch user's cart
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({ error: "Cart is empty" });
+    }
+
+    const validItems = cart.items.filter((item) => item.productId);
+
+    // Calculate totals
+    const cartTotal = validItems.reduce((total, item) => total + item.quantity * item.productId.price, 0);
+    const discountAmount = cart.promoCode === "CROW10" ? cartTotal * 0.1 : 0;
+    const discountedTotal = cartTotal - discountAmount;
+
+    // Create order
+    const order = new Order({
+      userId,
+      products: validItems.map((item) => ({
+        productId: item.productId._id,
+        quantity: item.quantity,
+        price: item.productId.price,
+        size: item.size,
+        color: item.color,
+      })),
+      totalAmount: cartTotal,
+      discountedTotal,
+      discount: discountAmount,
+      promoCode: cart.promoCode,
+      paymentIntentId,
+      paymentStatus: "succeeded",
+      paymentMethod: "card",
+      shippingAddress,
+      orderStatus: "processing",
+    });
+
+    await order.save();
+
+    // Update user's address
+    await User.findByIdAndUpdate(userId, {
+      address: shippingAddress,
+    });
+
+    // Clear the cart
+    await Cart.findOneAndUpdate({ userId }, { items: [], promoCode: null });
+
+    res.json({
+      success: true,
+      orderId: order._id,
+      message: "Order created successfully",
+    });
+  } catch (error) {
+    console.error("Payment confirmation error:", error);
+    res.status(500).json({ error: "Order creation failed" });
+  }
+});
+
+// Get payment status
+app.get("/api/payment-status/:paymentIntentId", authMiddleware, async (req, res) => {
+  try {
+    const { paymentIntentId } = req.params;
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    res.json({
+      status: paymentIntent.status,
+      amount: paymentIntent.amount,
+    });
+  } catch (error) {
+    console.error("Payment status check error:", error);
+    res.status(500).json({ error: "Failed to check payment status" });
   }
 });
 

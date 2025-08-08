@@ -17,15 +17,13 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    phone: {
-      type: String,
-      default: "",
-    },
+    // Updated address object to include phone
     address: {
       street: { type: String },
       city: { type: String },
       postalCode: { type: String },
       country: { type: String },
+      phone: { type: String }, // Added phone to address
     },
     isVerified: {
       type: Boolean,
