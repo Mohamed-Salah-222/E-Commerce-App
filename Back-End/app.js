@@ -459,7 +459,8 @@ app.get("/api/auth/google/callback", passport.authenticate("google", { session: 
 
   const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-  res.redirect(`http://localhost:5173/auth/google/callback?token=${token}`);
+  // Redirect to your deployed frontend
+  res.redirect(`https://e-commerce-orfgivnf8-silvercrows-projects.vercel.app/auth/google/callback?token=${token}`);
 });
 
 app.get("/api/user/me", authMiddleware, async (req, res) => {
