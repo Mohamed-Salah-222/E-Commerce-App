@@ -89,6 +89,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password/:userId/:token" element={<ResetPasswordPage />} />
           <Route path="/auth/google/callback" element={<GoogleAuthCallbackPage />} />
+
           <Route
             path="/cart"
             element={
