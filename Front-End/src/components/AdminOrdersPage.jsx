@@ -275,5 +275,4 @@ const AdminOrdersPage = () => {
     </div>
   );
 };
-
 export default AdminOrdersPage;
