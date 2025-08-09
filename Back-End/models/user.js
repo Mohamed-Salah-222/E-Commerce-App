@@ -17,13 +17,13 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    // Updated address object to include phone
+
     address: {
       street: { type: String },
       city: { type: String },
       postalCode: { type: String },
       country: { type: String },
-      phone: { type: String }, // Added phone to address
+      phone: { type: String },
     },
     isVerified: {
       type: Boolean,
@@ -31,7 +31,7 @@ const userSchema = new Schema(
     },
     admin: {
       type: Boolean,
-      default: false, // Change to true temporarily, then back to false
+      default: false,
     },
     verificationCode: {
       type: String,

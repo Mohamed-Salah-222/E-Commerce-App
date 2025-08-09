@@ -80,7 +80,6 @@ const orderSchema = new Schema(
       country: { type: String, required: true },
       phone: { type: String, required: true },
     },
-
     orderStatus: {
       type: String,
       enum: ["processing", "shipped", "delivered", "cancelled"],

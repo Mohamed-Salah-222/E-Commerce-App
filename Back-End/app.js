@@ -25,11 +25,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(passport.initialize());
 
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  next();
-});
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "public/images");
@@ -153,22 +148,63 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-app.post("/api/products", upload.single("productImage"), async (req, res) => {
+// Add a separate endpoint for JSON-based product creation
+app.post("/api/admin/products", authMiddleware, async (req, res) => {
   try {
-    const { name, description, price, sizes, colors } = req.body;
-    if (!req.file) {
-      return res.status(400).json({ message: "Product image is required." });
-    }
+    const { name, description, price, imageUrl, sizes, colors, status } = req.body;
+
     if (!name || !price) {
       return res.status(400).json({ message: "Name and price are required." });
     }
+
+    const newProduct = new Product({
+      name: name.trim(),
+      description: description?.trim() || "",
+      price: parseFloat(price),
+      imageUrl: imageUrl?.trim() || "",
+      sizes: Array.isArray(sizes) ? sizes : [],
+      colors: Array.isArray(colors) ? colors : [],
+      status: status || "available",
+    });
+
+    const savedProduct = await newProduct.save();
+    res.status(201).json({ product: savedProduct });
+  } catch (error) {
+    console.error("Error creating product:", error);
+    res.status(500).json({ message: "Server error while creating product." });
+  }
+});
+
+// Keep your existing endpoint for file uploads
+app.post("/api/products", upload.single("productImage"), async (req, res) => {
+  try {
+    const { name, description, price, sizes, colors } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Product image is required." });
+    }
+
+    if (!name || !price) {
+      return res.status(400).json({ message: "Name and price are required." });
+    }
+
     const imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
     const sizesArray = sizes ? sizes.split(",").map((s) => s.trim()) : [];
     const colorsArray = colors ? colors.split(",").map((c) => c.trim()) : [];
-    const newProduct = new Product({ name, description, price, imageUrl, sizes: sizesArray, colors: colorsArray });
+
+    const newProduct = new Product({
+      name,
+      description,
+      price,
+      imageUrl,
+      sizes: sizesArray,
+      colors: colorsArray,
+    });
+
     const savedProduct = await newProduct.save();
     res.status(201).json(savedProduct);
   } catch (error) {
+    console.error("Error creating product:", error);
     res.status(500).json({ message: "Server error while creating product." });
   }
 });
@@ -299,6 +335,31 @@ app.post("/api/cart", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Server error while adding item to cart." });
   }
 });
+app.delete("/api/admin/products/:productId", authMiddleware, async (req, res) => {
+  try {
+    // Check if user is admin (add your admin check logic here)
+    // if (!req.user.isAdmin) {
+    //   return res.status(403).json({ message: "Admin access required" });
+    // }
+
+    const productId = req.params.productId;
+
+    // Delete the actual product from the Product collection
+    const deletedProduct = await Product.findByIdAndDelete(productId);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({
+      message: "Product deleted successfully",
+      deletedProduct,
+    });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).json({ message: "Server error while deleting product" });
+  }
+});
 
 app.delete("/api/cart/items/:productId", authMiddleware, async (req, res) => {
   try {
@@ -383,7 +444,7 @@ app.put("/api/user/profile", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    const { username, phone, address } = req.body;
+    const { username, address } = req.body;
 
     const userToUpdate = await User.findById(userId);
 
@@ -392,7 +453,6 @@ app.put("/api/user/profile", authMiddleware, async (req, res) => {
     }
 
     if (username) userToUpdate.username = username;
-    if (phone) userToUpdate.phone = phone;
     if (address) userToUpdate.address = address;
 
     const updatedUser = await userToUpdate.save();
@@ -401,7 +461,6 @@ app.put("/api/user/profile", authMiddleware, async (req, res) => {
       _id: updatedUser._id,
       username: updatedUser.username,
       email: updatedUser.email,
-      phone: updatedUser.phone,
       address: updatedUser.address,
     };
 
@@ -446,6 +505,254 @@ app.patch("/api/cart/promo", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Server error while applying promo code." });
   }
 });
+//*--------Admin Section
+app.get("/api/admin/orders", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "user not found" });
+    }
+    if (user.admin === false) {
+      return res.status(403).json({ message: "Forbidden: Admin access required" });
+    }
+
+    const orders = await Order.find().populate("userId", "username email").sort({ createdAt: -1 });
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.log("Server error while loading orders", error);
+    res.status(500).json({ message: "Server error while loading orders", error });
+  }
+});
+
+app.patch("/api/admin/orders/:id", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "user not found" });
+    }
+    if (user.admin === false) {
+      return res.status(403).json({ message: "Forbidden: Admin access required" });
+    }
+
+    const orderId = req.params.id;
+    const { orderStatus } = req.body;
+
+    if (!orderStatus) {
+      return res.status(400).json({ message: "orderStatus is required" });
+    }
+
+    // Use findByIdAndUpdate to avoid full document validation
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      { orderStatus },
+      { new: true, runValidators: false } // Only validate the updated field
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.status(200).json(updatedOrder);
+  } catch (error) {
+    console.error("Error Updating order:", error);
+    res.status(500).json({ message: "Server error while updating order." });
+  }
+});
+
+app.patch("/api/admin/user/:id", authMiddleware, async (req, res) => {
+  try {
+    // Get the current user (admin) making the request
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the current user is an admin
+    if (user.admin === false) {
+      return res.status(403).json({ message: "Forbidden: Admin access required" });
+    }
+
+    // Get the user to be updated
+    const userToUpdateId = req.params.id;
+
+    // Validate the user ID parameter
+    if (!userToUpdateId) {
+      return res.status(400).json({ message: "User ID parameter is required" });
+    }
+
+    const userToUpdate = await User.findById(userToUpdateId);
+
+    if (!userToUpdate) {
+      return res.status(404).json({ message: "User to update not found" });
+    }
+
+    // Check if user is already an admin
+    if (userToUpdate.admin === true) {
+      return res.status(400).json({ message: "User is already an admin" });
+    }
+
+    // Update the user to admin
+    const updatedUser = await User.findByIdAndUpdate(userToUpdateId, { admin: true }, { new: true, runValidators: true }).select("-password");
+
+    // Return success response
+    res.status(200).json({
+      message: "User successfully promoted to admin",
+      user: {
+        id: updatedUser._id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        admin: updatedUser.admin,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating user to admin:", error);
+
+    // Handle specific MongoDB errors
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "Invalid user ID format" });
+    }
+
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: "Validation error", details: error.message });
+    }
+
+    // Generic server error
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.get("/api/admin/users", authMiddleware, async (req, res) => {
+  try {
+    // Get the current user (admin) making the request
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the current user is an admin
+    if (user.admin === false) {
+      return res.status(403).json({ message: "Forbidden: Admin access required" });
+    }
+
+    // Fetch all users, exclude passwords for security, sort by creation date (newest first)
+    const users = await User.find()
+      .select("-password") // Exclude password field from response
+      .sort({ createdAt: -1 });
+
+    // Return users with count
+    res.status(200).json({
+      message: "Users retrieved successfully",
+      count: users.length,
+      users: users,
+    });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+
+    // Handle specific MongoDB errors
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "Invalid user ID format" });
+    }
+
+    if (error.name === "MongoError" || error.name === "MongoServerError") {
+      return res.status(503).json({ message: "Database connection error" });
+    }
+
+    // Generic server error
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.patch("/api/admin/product/:id", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.admin === false) {
+      return res.status(403).json({ message: "Forbidden: Admin access required" });
+    }
+    const productId = req.params.id;
+    if (!productId) {
+      return res.status(400).json({ message: "Product ID is required" });
+    }
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    const { name, description, price, imageUrl, sizes, colors, status } = req.body;
+    if (price !== undefined && (typeof price !== "number" || price < 0)) {
+      return res.status(400).json({ message: "Price must be a positive number" });
+    }
+    if (status && !["available", "out_of_stock"].includes(status)) {
+      return res.status(400).json({ message: "Status must be either 'available' or 'out_of_stock'" });
+    }
+    if (sizes && !Array.isArray(sizes)) {
+      return res.status(400).json({ message: "Sizes must be an array" });
+    }
+
+    if (colors && !Array.isArray(colors)) {
+      return res.status(400).json({ message: "Colors must be an array" });
+    }
+    const updateData = {};
+    if (name !== undefined) updateData.name = name.trim();
+    if (description !== undefined) updateData.description = description.trim();
+    if (price !== undefined) updateData.price = price;
+    if (imageUrl !== undefined) updateData.imageUrl = imageUrl.trim();
+    if (sizes !== undefined) updateData.sizes = sizes.filter((size) => size.trim() !== "");
+    if (colors !== undefined) updateData.colors = colors.filter((color) => color.trim() !== "");
+    if (status !== undefined) updateData.status = status;
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ message: "No valid fields provided for update" });
+    }
+    const updatedProduct = await Product.findByIdAndUpdate(productId, updateData, {
+      new: true,
+      runValidators: true,
+    });
+    console.log(`Product ${productId} updated by admin ${user.username}:`, updateData);
+    res.status(200).json({
+      message: "Product updated successfully",
+      product: updatedProduct,
+    });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "Invalid product ID format" });
+    }
+
+    if (error.name === "ValidationError") {
+      const errors = Object.values(error.errors).map((err) => err.message);
+      return res.status(400).json({
+        message: "Validation error",
+        details: errors,
+      });
+    }
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.get("/api/auth/me", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+    res.json({
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      address: user.address,
+      admin: user.admin,
+    });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Failed to fetch user data" });
+  }
+});
 
 app.get(
   "/api/auth/google",
@@ -464,7 +771,6 @@ app.get("/api/auth/google/callback", passport.authenticate("google", { session: 
 
   const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-  // Redirect to your deployed frontend
   res.redirect(`https://e-commerce-app-neon-eight.vercel.app/auth/google/callback?token=${token}`);
 });
 
@@ -529,11 +835,6 @@ app.post("/api/create-payment-intent", authMiddleware, async (req, res) => {
     // Fetch user's cart
     const cart = await Cart.findOne({ userId }).populate("items.productId");
 
-    // Debug: Log the cart result
-    console.log("Cart found:", cart);
-    console.log("Cart items:", cart?.items);
-    console.log("Cart items length:", cart?.items?.length);
-
     if (!cart) {
       return res.status(400).json({ error: "No cart found for user" });
     }
@@ -541,15 +842,6 @@ app.post("/api/create-payment-intent", authMiddleware, async (req, res) => {
     if (!cart.items || cart.items.length === 0) {
       return res.status(400).json({ error: "Cart is empty" });
     }
-
-    // Debug: Log each item
-    cart.items.forEach((item, index) => {
-      console.log(`Item ${index}:`, {
-        productId: item.productId,
-        quantity: item.quantity,
-        productExists: !!item.productId,
-      });
-    });
 
     // Filter valid items and calculate totals
     const validItems = cart.items.filter((item) => item.productId);

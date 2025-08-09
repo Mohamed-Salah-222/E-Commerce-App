@@ -3,18 +3,18 @@ import { useAuth } from "../context/AuthContext";
 import { useNotification } from "../context/NotificationContext";
 
 function UserProfilePage() {
-  const { token } = useAuth();
+  const { token, refetchUser } = useAuth();
   const { showNotification } = useNotification();
 
   const [profile, setProfile] = useState({
     username: "",
     email: "",
-    phone: "",
     address: {
       street: "",
       city: "",
       postalCode: "",
       country: "",
+      phone: "",
     },
   });
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ function UserProfilePage() {
     const fetchUserProfile = async () => {
       if (!token) return;
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/me`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) throw new Error("Failed to fetch profile.");
@@ -33,7 +33,7 @@ function UserProfilePage() {
         setProfile({
           username: data.username || "",
           email: data.email || "",
-          phone: data.phone || "",
+          phone: data.address.phone || "",
           address: data.address || { street: "", city: "", postalCode: "", country: "" },
         });
       } catch (error) {
@@ -49,7 +49,7 @@ function UserProfilePage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     // If the input is part of the nested address object
-    if (["street", "city", "postalCode", "country"].includes(name)) {
+    if (["street", "city", "postalCode", "country", "phone"].includes(name)) {
       setProfile((prevProfile) => ({
         ...prevProfile,
         address: {
@@ -78,11 +78,13 @@ function UserProfilePage() {
         },
         body: JSON.stringify({
           username: profile.username,
-          phone: profile.phone,
           address: profile.address,
         }),
       });
       if (!response.ok) throw new Error("Failed to update profile.");
+
+      // Refresh user data in auth context to update navbar
+      await refetchUser();
 
       showNotification("Profile updated successfully!", "success");
     } catch (error) {
@@ -140,7 +142,7 @@ function UserProfilePage() {
                   Phone Number
                 </label>
                 <div className="relative">
-                  <input type="tel" name="phone" id="phone" value={profile.phone} onChange={handleChange} className="w-full p-4 border-2 border-gray-200 rounded-xl shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 hover:border-gray-300 bg-gradient-to-br from-white to-gray-50" />
+                  <input type="tel" name="phone" id="phone" value={profile.address.phone} onChange={handleChange} className="w-full p-4 border-2 border-gray-200 rounded-xl shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 hover:border-gray-300 bg-gradient-to-br from-white to-gray-50" />
                   <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-focus-within:opacity-5 transition-opacity duration-200 pointer-events-none"></div>
                 </div>
               </div>

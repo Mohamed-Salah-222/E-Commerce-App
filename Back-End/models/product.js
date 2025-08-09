@@ -25,6 +25,11 @@ const productSchema = new Schema(
       type: [String],
       default: [],
     },
+    status: {
+      type: String,
+      enum: ["available", "out_of_stock"],
+      default: "available",
+    },
   },
   { timestamps: true }
 );

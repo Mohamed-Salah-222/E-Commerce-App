@@ -7,6 +7,9 @@ import RegisterPage from "./components/RegisterPage";
 import LoginPage from "./components/LoginPage";
 import CartPage from "./components/CartPage";
 import OrderHistoryPage from "./components/OrderHistoryPage";
+import AdminOrdersPage from "./components/AdminOrdersPage";
+import AdminUsersPage from "./components/AdminUsersPage"; // New admin users component
+import AdminProductsPage from "./components/AdminProductsPage"; // New admin products component
 import ProtectedRoute from "./components/ProtectedRoute";
 import VerifyPage from "./components/VerifyPage";
 import Notification from "./components/Notification";
@@ -26,6 +29,8 @@ function App() {
     navigate("/login");
   };
 
+  const isAdmin = user?.admin === true; // Check if user is admin
+
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
       <Notification />
@@ -37,29 +42,46 @@ function App() {
               <Link to="/" className="text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
                 E-Store
               </Link>
-              <div className="hidden md:flex items-baseline space-x-4">
-                <Link to="/" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
-                  Products
-                </Link>
-              </div>
             </div>
 
             <div className="flex items-center space-x-4">
               {user ? (
                 <>
-                  <Link to="/profile" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
-                    My Profile
-                  </Link>
-                  <Link to="/cart" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
-                    My Cart
-                  </Link>
-                  <Link to="/orders" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
-                    My Orders
-                  </Link>
-                  <span className="text-gray-300 hidden sm:block">|</span>
-                  <span className="text-sm text-gray-700 hidden sm:block">
-                    <span className="font-bold text-gray-900">{user.username}</span>
-                  </span>
+                  {/* Admin Navigation */}
+                  {isAdmin ? (
+                    <>
+                      <Link to="/admin/orders" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                        Orders
+                      </Link>
+                      <Link to="/admin/products" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                        Products
+                      </Link>
+                      <Link to="/admin/users" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                        Users
+                      </Link>
+                      <span className="text-gray-300 hidden sm:block">|</span>
+                      <span className="text-sm text-gray-700 hidden sm:block">
+                        <span className="font-bold text-indigo-600">{user.username}</span>
+                      </span>
+                    </>
+                  ) : (
+                    /* Regular User Navigation */
+                    <>
+                      <Link to="/profile" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                        My Profile
+                      </Link>
+                      <Link to="/cart" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                        My Cart
+                      </Link>
+                      <Link to="/orders" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
+                        My Orders
+                      </Link>
+                      <span className="text-gray-300 hidden sm:block">|</span>
+                      <span className="text-sm text-gray-700 hidden sm:block">
+                        <span className="font-bold text-gray-900">{user.username}</span>
+                      </span>
+                    </>
+                  )}
                   <button onClick={handleLogout} className="bg-stone-100 hover:bg-stone-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                     Logout
                   </button>
@@ -90,6 +112,7 @@ function App() {
           <Route path="/reset-password/:userId/:token" element={<ResetPasswordPage />} />
           <Route path="/auth/google/callback" element={<GoogleAuthCallbackPage />} />
 
+          {/* Regular User Routes */}
           <Route
             path="/cart"
             element={
@@ -119,6 +142,32 @@ function App() {
             element={
               <ProtectedRoute>
                 <CheckoutPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin Routes */}
+          <Route
+            path="/admin/orders"
+            element={
+              <ProtectedRoute>
+                <AdminOrdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/products"
+            element={
+              <ProtectedRoute>
+                <AdminProductsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <AdminUsersPage />
               </ProtectedRoute>
             }
           />
