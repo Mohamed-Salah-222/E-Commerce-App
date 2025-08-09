@@ -15,13 +15,37 @@ function LoginPage() {
   const successMessage = location.state?.message;
 
   // Quick login function
-  const handleQuickLogin = (userType) => {
-    if (userType === "admin") {
-      setEmail(import.meta.env.VITE_ADMIN_EMAIL);
-      setPassword(import.meta.env.VITE_ADMIN_PASSWORD);
-    } else {
-      setEmail(import.meta.env.VITE_TEST_USER_EMAIL);
-      setPassword(import.meta.env.VITE_TEST_USER_PASSWORD);
+  const handleQuickLogin = async (userType) => {
+    setError("");
+    setLoading(true);
+
+    try {
+      const credentials =
+        userType === "admin"
+          ? {
+              email: import.meta.env.VITE_ADMIN_EMAIL,
+              password: import.meta.env.VITE_ADMIN_PASSWORD,
+            }
+          : {
+              email: import.meta.env.VITE_TEST_USER_EMAIL,
+              password: import.meta.env.VITE_TEST_USER_PASSWORD,
+            };
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to log in");
+
+      login(data.token);
+      navigate("/");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,23 +120,31 @@ function LoginPage() {
               <svg className="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
-              Quick Login
+              Portfolio Demo - Quick Login
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => handleQuickLogin("user")} className="flex items-center justify-center px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 relative overflow-hidden group/demo">
+            <button
+              onClick={() => handleQuickLogin("user")}
+              disabled={loading}
+              className="flex items-center justify-center px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group/demo"
+            >
               <div className="absolute inset-0 -translate-x-full group-hover/demo:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
               <svg className="w-3.5 h-3.5 mr-1.5 relative z-10" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
               </svg>
-              <span className="relative z-10">Test User</span>
+              <span className="relative z-10">{loading ? "Logging..." : "Test User"}</span>
             </button>
-            <button onClick={() => handleQuickLogin("admin")} className="flex items-center justify-center px-3 py-2 bg-gradient-to-r from-rose-500 to-pink-600 text-white text-xs font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 relative overflow-hidden group/demo">
+            <button
+              onClick={() => handleQuickLogin("admin")}
+              disabled={loading}
+              className="flex items-center justify-center px-3 py-2 bg-gradient-to-r from-rose-500 to-pink-600 text-white text-xs font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group/demo"
+            >
               <div className="absolute inset-0 -translate-x-full group-hover/demo:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
               <svg className="w-3.5 h-3.5 mr-1.5 relative z-10" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
-              <span className="relative z-10">Admin</span>
+              <span className="relative z-10">{loading ? "Logging..." : "Admin"}</span>
             </button>
           </div>
         </div>
