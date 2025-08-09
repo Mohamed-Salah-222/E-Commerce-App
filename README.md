@@ -1,52 +1,39 @@
-<h1 align="center">
 🛍️ Full-Stack E-commerce Platform
-</h1>
+A complete, feature-rich e-commerce application built with React.js, featuring modern UI components and comprehensive shopping functionality.
 
-<p align="center">
-A complete, feature-rich e-commerce application built from scratch with a modern MERN stack (MongoDB, Express, React, Node.js) and styled with Tailwind CSS.
-</p>
-
-<p align="center">
-<strong>Status:</strong> Complete
-</p>
+Status: Complete
 
 ✨ Key Features
-
-<table>
-<tr>
-<td valign="top" width="50%">
-<h3>Backend (Node.js & Express)</h3>
-<ul>
-<li><b>Secure User Authentication:</b> Full registration and login system using JWTs and <code>bcrypt</code> for password hashing.</li>
-<li><b>Role-Based Authorization:</b> A system with <code>user</code> and <code>admin</code> roles, protecting critical routes.</li>
-<li><b>Full CRUD for Products:</b> Complete API endpoints for product management, protected by admin authorization.</li>
-<li><b>User-Specific Shopping Carts:</b> Persistent shopping carts with logic for adding, removing, and updating items with variants (size/color).</li>
-<li><b>Promo Code System:</b> Business logic to apply percentage-based discounts to the cart total.</li>
-<li><b>Image Uploads:</b> Handles <code>multipart/form-data</code> using <code>multer</code> to store and serve product images.</li>
-<li><b>Persistent Order System:</b> A full checkout flow that creates permanent, detailed order records.</li>
-</ul>
-</td>
-<td valign="top" width="50%">
-<h3>Frontend (React)</h3>
-<ul>
-<li><b>Dynamic & Polished UI:</b> A fully responsive interface built with React and styled with Tailwind CSS, featuring a modern design.</li>
-<li><b>Client-Side Routing:</b> Seamless navigation between pages using React Router, including protected routes.</li>
-<li><b>Global State Management:</b> Uses React Context for authentication and a global notification system.</li>
-<li><b>Advanced Search & Sort:</b> Live search and sorting options to filter the product catalog.</li>
-<li><b>Full E-commerce Flow:</b> Users can register, log in, browse products, select variants, manage their cart, apply promo codes, check out, and view order history.</li>
-<li><b>Toast Notifications:</b> A professional, non-disruptive notification system for user feedback.</li>
-</ul>
-</td>
-</tr>
-</table>
-
+Frontend (React.js)
+Secure User Authentication: Complete registration and login system with password recovery and Google OAuth integration.
+Role-Based Access Control: User and admin dashboards with protected routes and role-specific functionality.
+Dynamic Product Catalog: Browse products with advanced search, filtering, and detailed product pages.
+Shopping Cart Management: Persistent cart with add/remove items, quantity updates, and real-time price calculations.
+Checkout & Payment Processing: Secure payment flow with integrated payment gateway and order confirmation.
+Order Management: Complete order history tracking and status updates for users.
+Admin Panel: Comprehensive admin interface for managing products, orders, and users.
+Email Verification System: Account verification and password reset functionality.
+Toast Notifications: Professional notification system for user feedback and status updates.
+Responsive Design: Fully responsive interface optimized for desktop, tablet, and mobile devices.
+User Experience
+Seamless Navigation: Client-side routing with React Router for smooth page transitions.
+Real-time Updates: Live cart updates, order status notifications, and inventory management.
+Social Login Integration: Google OAuth for quick and secure user registration/login.
+Profile Management: Users can update personal information and manage account settings.
+Protected Routes: Secure access to user-specific pages and admin functionality.
 🛠️ Tech Stack
-Frontend: React, React Router, Tailwind CSS
+Frontend: React.js, React Router, JSX Components
+Authentication: JWT, Google OAuth, Email Verification
+State Management: React Context/Hooks
+UI/Styling: Tailwind
+Payment Processing: Integrated Payment Gateway
+Tools & Deployment: Git, npm
 
-Backend: Node.js, Express.js
+📁 Component Structure
+The application includes 19+ React components covering:
 
-Database: MongoDB
-
-Authentication: JWT, Bcrypt
-
-Tools & Deployment: Git, Postman, Vercel, Render
+User Management: Registration, Login, Profile, Password Recovery
+Shopping Experience: Product Catalog, Cart, Checkout, Order History
+Admin Dashboard: Product Management, Order Management, User Management
+Authentication: Protected Routes, Email Verification, OAuth Callbacks
+UI Components: Notifications, Payment Modals, Product Cards
