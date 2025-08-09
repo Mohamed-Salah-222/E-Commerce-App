@@ -14,6 +14,17 @@ function LoginPage() {
 
   const successMessage = location.state?.message;
 
+  // Quick login function
+  const handleQuickLogin = (userType) => {
+    if (userType === "admin") {
+      setEmail(import.meta.env.VITE_ADMIN_EMAIL);
+      setPassword(import.meta.env.VITE_ADMIN_PASSWORD);
+    } else {
+      setEmail(import.meta.env.VITE_TEST_USER_EMAIL);
+      setPassword(import.meta.env.VITE_TEST_USER_PASSWORD);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -78,11 +89,39 @@ function LoginPage() {
           </div>
         )}
 
+        {/* Quick Login Demo Section */}
+        <div className="bg-gradient-to-r from-amber-50/80 to-orange-50/80 backdrop-blur-sm border border-amber-200/50 rounded-xl p-4 space-y-3 animate-in slide-in-from-top duration-500" style={{ animationDelay: "100ms" }}>
+          <div className="text-center">
+            <p className="text-xs font-semibold text-amber-700 flex items-center justify-center">
+              <svg className="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              Portfolio Demo - Quick Login
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => handleQuickLogin("user")} className="flex items-center justify-center px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 relative overflow-hidden group/demo">
+              <div className="absolute inset-0 -translate-x-full group-hover/demo:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+              <svg className="w-3.5 h-3.5 mr-1.5 relative z-10" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+              </svg>
+              <span className="relative z-10">Test User</span>
+            </button>
+            <button onClick={() => handleQuickLogin("admin")} className="flex items-center justify-center px-3 py-2 bg-gradient-to-r from-rose-500 to-pink-600 text-white text-xs font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 relative overflow-hidden group/demo">
+              <div className="absolute inset-0 -translate-x-full group-hover/demo:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+              <svg className="w-3.5 h-3.5 mr-1.5 relative z-10" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="relative z-10">Admin</span>
+            </button>
+          </div>
+        </div>
+
         {/* Enhanced Google Sign-in Button */}
         <a
           href={`${import.meta.env.VITE_API_URL}/api/auth/google`}
           className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 hover:scale-[1.02] hover:shadow-md group/google relative overflow-hidden animate-in slide-in-from-left duration-500"
-          style={{ animationDelay: "100ms" }}
+          style={{ animationDelay: "200ms" }}
         >
           {/* Subtle shine effect */}
           <div className="absolute inset-0 -translate-x-full group-hover/google:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
@@ -94,7 +133,7 @@ function LoginPage() {
         </a>
 
         {/* Enhanced Divider */}
-        <div className="relative animate-in fade-in duration-500" style={{ animationDelay: "200ms" }}>
+        <div className="relative animate-in fade-in duration-500" style={{ animationDelay: "300ms" }}>
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300"></div>
           </div>
@@ -106,7 +145,7 @@ function LoginPage() {
         {/* Enhanced Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Enhanced Email Field */}
-          <div className="group/field animate-in slide-in-from-left duration-500" style={{ animationDelay: "300ms" }}>
+          <div className="group/field animate-in slide-in-from-left duration-500" style={{ animationDelay: "400ms" }}>
             <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1 transition-all duration-200 group-focus-within/field:text-blue-600 group-focus-within/field:translate-x-1">
               <span className="flex items-center">
                 Email Address
@@ -137,7 +176,7 @@ function LoginPage() {
           </div>
 
           {/* Enhanced Password Field */}
-          <div className="group/field animate-in slide-in-from-left duration-500" style={{ animationDelay: "400ms" }}>
+          <div className="group/field animate-in slide-in-from-left duration-500" style={{ animationDelay: "500ms" }}>
             <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1 transition-all duration-200 group-focus-within/field:text-blue-600 group-focus-within/field:translate-x-1">
               <span className="flex items-center">
                 Password
@@ -192,7 +231,7 @@ function LoginPage() {
             type="submit"
             disabled={loading}
             className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group/btn animate-in slide-in-from-bottom duration-500"
-            style={{ animationDelay: "500ms" }}
+            style={{ animationDelay: "600ms" }}
           >
             {/* Button shine effect */}
             <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"></div>
@@ -219,7 +258,7 @@ function LoginPage() {
         </form>
 
         {/* Enhanced Footer */}
-        <p className="text-sm text-center text-gray-600 animate-in fade-in duration-500" style={{ animationDelay: "600ms" }}>
+        <p className="text-sm text-center text-gray-600 animate-in fade-in duration-500" style={{ animationDelay: "700ms" }}>
           Need an account?{" "}
           <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-700 transition-all duration-200 hover:underline relative group/link inline-block">
             <span className="relative z-10 transition-transform duration-200 group-hover/link:translate-x-0.5">Sign Up</span>

@@ -29,6 +29,10 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    admin: {
+      type: Boolean,
+      default: false, // Change to true temporarily, then back to false
+    },
     verificationCode: {
       type: String,
       required: false,
