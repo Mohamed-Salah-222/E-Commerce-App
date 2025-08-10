@@ -69,8 +69,13 @@ const AdminOrdersPage = () => {
 
       const updatedOrder = await response.json();
 
-      // Update the local state
-      setOrders(orders.map((order) => (order._id === orderId ? updatedOrder : order)));
+      // Update the local state while preserving user data
+      setOrders(orders.map((order) => (order._id === orderId ? { ...order, ...updatedOrder, userId: order.userId, user: order.user } : order)));
+
+      // Update selected order if it's the one being modified
+      if (selectedOrder && selectedOrder._id === orderId) {
+        setSelectedOrder({ ...selectedOrder, ...updatedOrder, userId: selectedOrder.userId, user: selectedOrder.user });
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -84,7 +89,7 @@ const AdminOrdersPage = () => {
 
   // Filter orders based on search and status
   const filteredOrders = orders.filter((order) => {
-    const matchesSearch = order.user?.username?.toLowerCase().includes(searchTerm.toLowerCase()) || order._id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = order.userId?.username?.toLowerCase().includes(searchTerm.toLowerCase()) || order.user?.username?.toLowerCase().includes(searchTerm.toLowerCase()) || order._id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || order.orderStatus === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -104,6 +109,16 @@ const AdminOrdersPage = () => {
       style: "currency",
       currency: "USD",
     }).format(amount);
+  };
+
+  // Helper function to get user data consistently
+  const getUserData = (order) => {
+    // Check both userId and user properties to handle different API response formats
+    const user = order.userId || order.user;
+    return {
+      username: user?.username || "N/A",
+      email: user?.email || "N/A",
+    };
   };
 
   if (loading) {
@@ -126,27 +141,32 @@ const AdminOrdersPage = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Management</h1>
-        <p className="text-gray-600">Manage and track all customer orders</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 p-6 space-y-10">
+      {/* Enhanced Header */}
+      <div className="backdrop-blur-md bg-white/80 rounded-3xl p-8 shadow-xl border border-white/20">
+        <div className="text-center">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent mb-4 tracking-tight">Order Management</h1>
+          <p className="text-slate-600 text-lg font-medium">Manage and track all customer orders with style</p>
+          <div className="w-24 h-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mx-auto mt-4"></div>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          {/* Search */}
+      {/* Enhanced Filters */}
+      <div className="backdrop-blur-md bg-white/90 rounded-3xl p-8 shadow-xl border border-white/20">
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Enhanced Search */}
           <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <input type="text" placeholder="Search by customer name or order ID..." className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none transition-colors duration-300 group-focus-within:text-purple-500">
+                <Search className="h-5 w-5 text-slate-400 group-focus-within:text-purple-500" />
+              </div>
+              <input type="text" placeholder="Search by customer name or order ID..." className="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 text-lg placeholder-slate-400 shadow-sm hover:shadow-md" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
           </div>
 
-          {/* Status Filter */}
-          <div className="md:w-48">
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          {/* Enhanced Status Filter */}
+          <div className="md:w-56">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full px-6 py-4 bg-white border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 text-lg font-medium shadow-sm hover:shadow-md">
               <option value="all">All Statuses</option>
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -158,60 +178,69 @@ const AdminOrdersPage = () => {
         </div>
       </div>
 
-      {/* Orders Table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      {/* Enhanced Orders Table */}
+      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-white/50">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full">
+            <thead className="bg-gradient-to-r from-slate-50 to-slate-100">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-8 py-6 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Order ID</th>
+                <th className="px-8 py-6 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Customer</th>
+                <th className="px-8 py-6 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Date</th>
+                <th className="px-8 py-6 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Total</th>
+                <th className="px-8 py-6 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Status</th>
+                <th className="px-8 py-6 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredOrders.map((order) => {
+            <tbody className="bg-white">
+              {filteredOrders.map((order, index) => {
                 const statusInfo = getStatusInfo(order.orderStatus);
                 const StatusIcon = statusInfo.icon;
+                const userData = getUserData(order);
 
                 return (
-                  <tr key={order._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-mono text-gray-900">#{order._id.slice(-8).toUpperCase()}</div>
+                  <tr key={order._id} className={`group transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 ${index !== filteredOrders.length - 1 ? "border-b border-slate-100" : ""}`}>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="text-sm font-mono font-bold text-slate-900 bg-slate-100 px-3 py-1 rounded-lg">#{order._id.slice(-8).toUpperCase()}</div>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{order.userId?.username || 'N/A'}</div>
-                      <div className="text-sm text-gray-500">{order.userId?.email || 'N/A'}</div>
+                    <td className="px-8 py-6">
+                      <div className="flex flex-col">
+                        <div className="text-sm font-semibold text-slate-900 group-hover:text-purple-700 transition-colors duration-300">{userData.username}</div>
+                        <div className="text-sm text-slate-500">{userData.email}</div>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{formatDate(order.createdAt)}</div>
+                    <td className="px-8 py-6">
+                      <div className="text-sm font-medium text-slate-700">{formatDate(order.createdAt)}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-semibold text-gray-900">{formatCurrency(order.totalAmount)}</div>
+                    <td className="px-8 py-6">
+                      <div className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">{formatCurrency(order.totalAmount)}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
-                        <StatusIcon className="w-3 h-3 mr-1" />
+                    <td className="px-8 py-6">
+                      <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-md backdrop-blur-sm ${statusInfo.color} transition-all duration-300 hover:scale-105`}>
+                        <StatusIcon className="w-4 h-4 mr-2" />
                         {statusInfo.label}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                      {/* Status Update Dropdown */}
-                      <select value={order.orderStatus} onChange={(e) => updateOrderStatus(order._id, e.target.value)} disabled={updatingOrderId === order._id} className="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        {statusOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center space-x-3">
+                        {/* Enhanced Status Update Dropdown */}
+                        <select value={order.orderStatus} onChange={(e) => updateOrderStatus(order._id, e.target.value)} disabled={updatingOrderId === order._id} className="text-sm border-2 border-slate-200 rounded-xl px-3 py-2 focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 font-medium shadow-sm hover:shadow-md disabled:opacity-50">
+                          {statusOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
 
-                      {/* View Details Button */}
-                      <button onClick={() => setSelectedOrder(order)} className="text-indigo-600 hover:text-indigo-900">
-                        <Eye className="w-4 h-4" />
-                      </button>
+                        {/* Enhanced View Details Button */}
+                        <button onClick={() => setSelectedOrder(order)} className="group/btn relative p-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl shadow-lg hover:shadow-xl hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-110">
+                          <Eye className="w-4 h-4 transition-transform duration-300 group-hover/btn:scale-110" />
+                          <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -220,53 +249,117 @@ const AdminOrdersPage = () => {
           </table>
         </div>
 
+        {/* Enhanced Empty State */}
         {filteredOrders.length === 0 && (
-          <div className="text-center py-12">
-            <Package className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No orders found</h3>
-            <p className="mt-1 text-sm text-gray-500">{searchTerm || statusFilter !== "all" ? "Try adjusting your search or filter criteria." : "No orders have been placed yet."}</p>
+          <div className="text-center py-20">
+            <div className="inline-flex items-center justify-center w-28 h-28 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full mb-8">
+              <Package className="w-14 h-14 text-slate-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-600 mb-3">No orders found</h3>
+            <p className="text-slate-500 text-lg max-w-md mx-auto">{searchTerm || statusFilter !== "all" ? "Try adjusting your search or filter criteria to find what you're looking for." : "No orders have been placed yet. Once customers start ordering, they'll appear here."}</p>
           </div>
         )}
       </div>
 
-      {/* Order Detail Modal */}
+      {/* Enhanced Order Detail Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">Order Details #{selectedOrder._id.slice(-8).toUpperCase()}</h3>
-              <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-500">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-8 py-6 flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-bold text-white">Order Details</h3>
+                <div className="text-purple-100 font-mono text-lg">#{selectedOrder._id.slice(-8).toUpperCase()}</div>
+              </div>
+              <button onClick={() => setSelectedOrder(null)} className="p-2 text-white hover:bg-white/20 rounded-xl transition-all duration-300 transform hover:scale-110">
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <div className="px-6 py-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Customer Information</h4>
-                  <p className="text-sm text-gray-600">Name: {selectedOrder.user?.username || "N/A"}</p>
-                  <p className="text-sm text-gray-600">Email: {selectedOrder.user?.email || "N/A"}</p>
+
+            {/* Modal Content */}
+            <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
+              {/* Customer and Order Info Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                {/* Customer Information Card */}
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+                  <h4 className="text-lg font-bold text-blue-800 mb-4 flex items-center">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                    Customer Information
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-blue-600 font-medium">Name:</span>
+                      <span className="text-blue-900 font-semibold">{getUserData(selectedOrder).username}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-600 font-medium">Email:</span>
+                      <span className="text-blue-900 font-semibold">{getUserData(selectedOrder).email}</span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Order Information</h4>
-                  <p className="text-sm text-gray-600">Date: {formatDate(selectedOrder.createdAt)}</p>
-                  <p className="text-sm text-gray-600">Total: {formatCurrency(selectedOrder.totalAmount)}</p>
-                  <p className="text-sm text-gray-600">Status: {getStatusInfo(selectedOrder.orderStatus).label}</p>
+
+                {/* Order Information Card */}
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
+                  <h4 className="text-lg font-bold text-green-800 mb-4 flex items-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    Order Information
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-green-600 font-medium">Date:</span>
+                      <span className="text-green-900 font-semibold">{formatDate(selectedOrder.createdAt)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-600 font-medium">Total:</span>
+                      <span className="text-green-900 font-bold text-xl">{formatCurrency(selectedOrder.totalAmount)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-600 font-medium">Status:</span>
+                      <span className="text-green-900 font-semibold">{getStatusInfo(selectedOrder.orderStatus).label}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-6">
-                <h4 className="font-medium text-gray-900 mb-2">Order Items</h4>
-                <div className="space-y-2">
+              {/* Order Items Section */}
+              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 border border-slate-200">
+                <h4 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
+                  <div className="w-2 h-2 bg-slate-500 rounded-full mr-2"></div>
+                  Order Items
+                </h4>
+                <div className="space-y-4">
                   {selectedOrder.products?.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{item.productId?.name || "Product"}</p>
-                        <p className="text-xs text-gray-500">Quantity: {item.quantity}</p>
+                    <div key={index} className="flex justify-between items-center p-4 bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                      <div className="flex-1">
+                        <p className="text-lg font-bold text-slate-900 mb-1">{item.productId?.name || "Product"}</p>
+                        <div className="flex items-center space-x-4">
+                          <span className="text-sm text-slate-600 bg-slate-100 px-3 py-1 rounded-full font-medium">Qty: {item.quantity}</span>
+                          <span className="text-sm text-slate-600 bg-slate-100 px-3 py-1 rounded-full font-medium">Unit: {formatCurrency(item.price)}</span>
+                        </div>
                       </div>
-                      <p className="text-sm font-medium text-gray-900">{formatCurrency(item.price * item.quantity)}</p>
+                      <div className="text-right">
+                        <p className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{formatCurrency(item.price * item.quantity)}</p>
+                      </div>
                     </div>
-                  )) || <p className="text-sm text-gray-500">No items found</p>}
+                  )) || (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-slate-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <Package className="w-8 h-8 text-slate-400" />
+                      </div>
+                      <p className="text-slate-500 text-lg">No items found in this order</p>
+                    </div>
+                  )}
                 </div>
+
+                {/* Order Total Summary */}
+                {selectedOrder.products && selectedOrder.products.length > 0 && (
+                  <div className="mt-6 pt-6 border-t border-slate-200">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xl font-bold text-slate-800">Order Total:</span>
+                      <span className="text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{formatCurrency(selectedOrder.totalAmount)}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -275,4 +368,5 @@ const AdminOrdersPage = () => {
     </div>
   );
 };
+
 export default AdminOrdersPage;
