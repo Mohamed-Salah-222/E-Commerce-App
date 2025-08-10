@@ -55,14 +55,14 @@ function HomePage() {
   }
 
   return (
-    <div className="space-y-32 overflow-hidden">
+    <div className="space-y-32 overflow-hidden pt-4">
       {/* --- Hero Section --- */}
       <div className="relative text-center py-24 px-4 bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-3xl shadow-xl overflow-hidden animate-fade-in-up">
         {/* Background Decorations */}
         <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-indigo-200/30 to-purple-200/30 rounded-full transform -translate-x-48 -translate-y-48 animate-float"></div>
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-tl from-purple-200/30 to-pink-200/30 rounded-full transform translate-x-40 translate-y-40 animate-float-delayed"></div>
 
-        <div className="relative z-10">
+        <div className="relative z-0">
           <h1 className="text-4xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 animate-gradient-x leading-tight">Find Your Perfect Style</h1>
           <div className="mt-2 flex justify-center">
             <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-expand-width"></div>
