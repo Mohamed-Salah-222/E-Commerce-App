@@ -4,10 +4,9 @@ import { Elements, CardElement, useStripe, useElements } from "@stripe/react-str
 import { useAuth } from "../context/AuthContext";
 import { useNotification } from "../context/NotificationContext";
 
-// Load Stripe (replace with your publishable key)
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-// Card element styling with enhanced options to reduce browser warnings
+
 const cardElementOptions = {
   style: {
     base: {
@@ -23,11 +22,11 @@ const cardElementOptions = {
       color: "#9e2146",
     },
   },
-  hidePostalCode: true, // This reduces some autofill warnings
+  hidePostalCode: true, 
   iconStyle: "solid",
 };
 
-// Payment Form Component (inside Elements wrapper)
+
 function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddress }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -48,7 +47,6 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
     phone: userAddress?.phone || "",
   });
 
-  // Check if form is pre-filled with user address
   useEffect(() => {
     const isPreFilled = userAddress && (userAddress.street || userAddress.city || userAddress.postalCode || userAddress.country || userAddress.phone);
     if (isPreFilled) {
@@ -56,10 +54,10 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
     }
   }, [userAddress]);
 
-  // Debounced function to create payment intent
+
   const createPaymentIntent = useCallback(
     async (addressData) => {
-      if (isCreatingIntent) return; // Prevent multiple calls
+      if (isCreatingIntent) return; 
 
       setIsCreatingIntent(true);
 
@@ -80,8 +78,6 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
         if (!response.ok) {
           const errorText = await response.text();
           console.error("Payment intent error:", response.status, errorText);
-
-          // Only show notification for actual server errors, not validation errors
           if (response.status >= 500) {
             showNotification("Failed to initialize payment", "error");
           }
@@ -95,12 +91,12 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
       } catch (error) {
         console.error("Payment intent error:", error);
 
-        // Only show error notification if it's not a network/validation issue
+
         if (!error.message.includes("400") && !error.message.includes("Failed to fetch")) {
           showNotification("Failed to initialize payment", "error");
         }
 
-        // Clear any existing client secret on error
+
         setClientSecret("");
         setPaymentIntentId("");
         setLastCreatedAddress(null);
@@ -111,9 +107,8 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
     [token, showNotification, isCreatingIntent]
   );
 
-  // Only create payment intent when user has interacted and form is complete
   useEffect(() => {
-    // Don't run if user hasn't started filling the form
+
     if (!hasUserInteracted) {
       return;
     }
@@ -121,27 +116,26 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
     const hasCompleteAddress = formData.street && formData.city && formData.postalCode && formData.country && formData.phone;
 
     if (!hasCompleteAddress) {
-      // Clear payment intent if form becomes incomplete
+
       setClientSecret("");
       setPaymentIntentId("");
       setLastCreatedAddress(null);
       return;
     }
 
-    // Only proceed if form has actual values (not just whitespace)
     const hasActualData = formData.street.trim() && formData.city.trim() && formData.postalCode.trim() && formData.country.trim() && formData.phone.trim();
 
     if (!hasActualData) {
       return;
     }
 
-    // Check if we already created a payment intent for this exact address
+
     const addressString = JSON.stringify(formData);
     if (lastCreatedAddress === addressString && clientSecret) {
-      return; // Don't recreate if address hasn't changed
+      return; 
     }
 
-    // Debounce the API call - wait 1.5 seconds after user stops typing
+
     const timeoutId = setTimeout(() => {
       createPaymentIntent(formData);
       setLastCreatedAddress(addressString);
@@ -151,7 +145,7 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
   }, [formData, createPaymentIntent, hasUserInteracted, lastCreatedAddress, clientSecret]);
 
   const handleInputChange = (e) => {
-    // Mark that user has started interacting with the form
+
     if (!hasUserInteracted) {
       setHasUserInteracted(true);
     }
@@ -173,7 +167,7 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
     setProcessing(true);
 
     try {
-      // Confirm the payment
+
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: elements.getElement(CardElement),
@@ -186,7 +180,6 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
         return;
       }
 
-      // Payment successful, now create the order
       const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/confirm-payment`, {
         method: "POST",
         headers: {
@@ -228,7 +221,7 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
             </button>
           </div>
 
-          {/* Order Summary */}
+
           <div className="bg-gray-50 rounded-xl p-6 mb-8">
             <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
             <div className="space-y-2">
@@ -250,7 +243,7 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6" autoComplete="on">
-            {/* Shipping Address */}
+
             <div>
               <h3 className="text-lg font-semibold mb-4">Shipping Address</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -281,7 +274,7 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
               </div>
             </div>
 
-            {/* Payment Status Indicator */}
+
             {isFormValid && (
               <div>
                 {isCreatingIntent && (
@@ -302,14 +295,13 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
               </div>
             )}
 
-            {/* Payment Details - Always show when form is valid */}
             {isFormValid && (
               <div>
                 <h3 className="text-lg font-semibold mb-4">Payment Details</h3>
                 <div
                   className={`p-4 border border-gray-300 rounded-lg ${isCreatingIntent ? "bg-gray-100 opacity-50" : "bg-gray-50"}`}
                   style={{
-                    /* Hide browser autofill warnings */
+     
                     position: "relative",
                   }}
                 >
@@ -319,7 +311,6 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
               </div>
             )}
 
-            {/* Submit Button */}
             <button type="submit" disabled={!stripe || processing || !isFormValid || !clientSecret || isCreatingIntent} className="w-full py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
               {processing ? (
                 <span className="flex items-center justify-center">
@@ -337,7 +328,6 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
             </button>
           </form>
 
-          {/* Security Notice */}
           <div className="mt-6 flex items-center justify-center text-sm text-gray-500">
             <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -347,7 +337,6 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
         </div>
       </div>
 
-      {/* CSS to hide browser autofill warnings */}
       <style jsx>{`
         /* Hide browser autofill warning tooltips */
         input:-webkit-autofill:hover::after,
@@ -379,7 +368,6 @@ function PaymentForm({ onSuccess, onClose, cartTotal, discountedTotal, userAddre
   );
 }
 
-// Main Payment Popup Component
 function PaymentPopup({ isOpen, onClose, onSuccess, cartTotal, discountedTotal, userAddress }) {
   if (!isOpen) return null;
 

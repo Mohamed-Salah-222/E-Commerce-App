@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { useNotification } from "../context/NotificationContext";
-import PaymentPopup from "./PaymentPopup"; // Import the payment popup
+import PaymentPopup from "./PaymentPopup"; 
 
 function CartPage() {
   const [cart, setCart] = useState(null);
@@ -16,7 +16,7 @@ function CartPage() {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
 
-  // --- DATA FETCHING ---
+
   const fetchCart = async () => {
     if (!token) {
       setLoading(false);
@@ -61,7 +61,7 @@ function CartPage() {
     fetchUserAddress();
   }, [token]);
 
-  // --- ACTION HANDLERS ---
+
   const handleRemoveItem = async (itemToRemove) => {
     try {
       const params = new URLSearchParams({
@@ -82,7 +82,7 @@ function CartPage() {
   };
 
   const handleCheckout = () => {
-    // Open payment popup instead of navigating
+
     setShowPaymentPopup(true);
   };
 
@@ -122,7 +122,6 @@ function CartPage() {
     }
   };
 
-  // --- RENDER LOGIC ---
   if (loading) return <div className="text-center p-10">Loading your cart...</div>;
 
   const validItems = cart ? cart.items.filter((item) => item.productId) : [];
@@ -150,20 +149,19 @@ function CartPage() {
           <h1 className="text-5xl md:text-6xl font-bold mb-12 text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text animate-slide-down text-center">Shopping Cart</h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
-            {/* Cart Items List */}
+ 
             <div className="lg:col-span-2 space-y-6 animate-slide-in-left">
               {validItems.map((item, index) => (
                 <div key={item.productId._id + item.size + item.color} className="group flex items-center bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-500 border-2 border-gray-100 hover:border-indigo-200 animate-cart-item overflow-hidden relative" style={{ animationDelay: `${index * 0.1}s` }}>
-                  {/* Background Decoration */}
+    
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-indigo-50/50 to-purple-50/50 rounded-full transform translate-x-16 -translate-y-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                  {/* Product Image */}
+   
                   <div className="relative">
                     <img src={item.productId.imageUrl} alt={item.productId.name} className="w-28 h-28 object-contain rounded-xl mr-8 bg-gradient-to-br from-gray-50 to-gray-100 p-2 shadow-md group-hover:scale-105 transition-transform duration-300" />
                     <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg animate-bounce-in">{item.quantity}</div>
                   </div>
 
-                  {/* Product Details */}
                   <div className="flex-grow relative z-10">
                     <h2 className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors duration-300 mb-2">{item.productId.name}</h2>
 
@@ -179,7 +177,7 @@ function CartPage() {
                     </p>
                   </div>
 
-                  {/* Price and Actions */}
+    
                   <div className="text-right relative z-10">
                     <p className="text-2xl font-bold text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text mb-3">${(item.quantity * item.productId.price).toFixed(2)}</p>
                     <button onClick={() => handleRemoveItem(item)} className="group/btn inline-flex items-center space-x-2 text-sm text-red-500 hover:text-red-700 font-bold px-3 py-2 rounded-lg hover:bg-red-50 transition-all duration-200 transform hover:scale-105">
@@ -193,20 +191,20 @@ function CartPage() {
               ))}
             </div>
 
-            {/* Order Summary Card */}
+    
             <div className="lg:col-span-1 animate-slide-in-right">
               <div className="bg-white/95 backdrop-blur-xl border-2 border-gray-100 rounded-3xl shadow-2xl p-8 sticky top-24 hover:shadow-3xl transition-shadow duration-500 overflow-hidden relative">
-                {/* Background Gradient */}
+        
                 <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-indigo-50 to-purple-50 rounded-full transform translate-x-20 -translate-y-20 opacity-50"></div>
 
                 <div className="relative z-10">
-                  {/* Header */}
+         
                   <div className="flex items-center space-x-3 mb-6 pb-6 border-b-2 border-gray-100">
                     <div className="w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full"></div>
                     <h2 className="text-2xl font-bold text-gray-800">Order Summary</h2>
                   </div>
 
-                  {/* Price Breakdown */}
+         
                   <div className="space-y-4 text-gray-700">
                     <div className="flex justify-between items-center py-2">
                       <span className="text-lg">Subtotal</span>
@@ -231,7 +229,7 @@ function CartPage() {
                     </div>
                   </div>
 
-                  {/* Promo Code Section */}
+           
                   <div className="mt-8 p-6 bg-gradient-to-br from-gray-50 to-indigo-50/30 rounded-2xl border border-gray-100">
                     <label className="block text-sm font-bold text-gray-700 mb-3 flex items-center space-x-2">
                       <span>Promo Code</span>
@@ -263,9 +261,9 @@ function CartPage() {
                     )}
                   </div>
 
-                  {/* Checkout Button */}
+          
                   <button onClick={handleCheckout} className="group w-full mt-8 py-5 font-bold text-xl text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-xl hover:shadow-2xl overflow-hidden relative">
-                    {/* Button Background Animation */}
+            
                     <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-shimmer-infinite"></div>
 
                     <span className="relative flex items-center justify-center space-x-3">
@@ -423,7 +421,6 @@ function CartPage() {
         `}</style>
       </div>
 
-      {/* Payment Popup */}
       <PaymentPopup isOpen={showPaymentPopup} onClose={() => setShowPaymentPopup(false)} onSuccess={handlePaymentSuccess} cartTotal={cartTotal} discountedTotal={discountedTotal} userAddress={userAddress} />
     </>
   );

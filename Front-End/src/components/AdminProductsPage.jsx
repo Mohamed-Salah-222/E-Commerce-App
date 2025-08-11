@@ -13,7 +13,6 @@ function AdminProductsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  // Form state for editing/adding products
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -95,13 +94,13 @@ function AdminProductsPage() {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file type
+
     if (!file.type.startsWith("image/")) {
       showNotification("Please select an image file", "error");
       return;
     }
 
-    // Validate file size (max 5MB)
+
     if (file.size > 5 * 1024 * 1024) {
       showNotification("Image size should be less than 5MB", "error");
       return;
@@ -110,7 +109,7 @@ function AdminProductsPage() {
     setUploadingImage(true);
 
     try {
-      // Method 1: Convert to Base64 (simple but not recommended for production)
+
       const reader = new FileReader();
       reader.onload = (event) => {
         setFormData((prev) => ({
@@ -121,20 +120,6 @@ function AdminProductsPage() {
       };
       reader.readAsDataURL(file);
 
-      // Note: For production, you'd want to upload to a service like:
-      // - AWS S3
-      // - Cloudinary
-      // - Your own file server
-      //
-      // Example with FormData for file upload:
-      // const uploadData = new FormData();
-      // uploadData.append('image', file);
-      // const response = await fetch('/api/upload', {
-      //   method: 'POST',
-      //   body: uploadData,
-      // });
-      // const data = await response.json();
-      // setFormData(prev => ({ ...prev, imageUrl: data.url }));
     } catch (error) {
       console.error("Image upload error:", error);
       showNotification("Failed to upload image", "error");
@@ -201,7 +186,7 @@ function AdminProductsPage() {
         throw new Error(errorMessage);
       }
 
-      // Remove the product from the local state
+
       setProducts((prev) => prev.filter((p) => p._id !== productId));
       showNotification("Product deleted successfully!", "success");
     } catch (error) {
@@ -218,7 +203,7 @@ function AdminProductsPage() {
       return;
     }
 
-    // Validate price
+
     const price = parseFloat(formData.price);
     if (isNaN(price) || price < 0) {
       showNotification("Please enter a valid price", "error");
@@ -229,7 +214,7 @@ function AdminProductsPage() {
       let response;
 
       if (editingProduct) {
-        // Update existing product - keep your existing JSON approach for updates
+
         const submitData = {
           name: formData.name.trim(),
           description: formData.description.trim(),
@@ -249,14 +234,14 @@ function AdminProductsPage() {
           body: JSON.stringify(submitData),
         });
       } else {
-        // Add new product - use FormData for file upload
+
         const formDataToSend = new FormData();
 
         formDataToSend.append("name", formData.name.trim());
         formDataToSend.append("description", formData.description.trim());
         formDataToSend.append("price", price.toString());
 
-        // Handle sizes and colors as comma-separated strings
+
         if (formData.sizes.length > 0) {
           formDataToSend.append("sizes", formData.sizes.join(","));
         }
@@ -264,7 +249,7 @@ function AdminProductsPage() {
           formDataToSend.append("colors", formData.colors.join(","));
         }
 
-        // Handle image file
+
         const fileInput = document.querySelector('input[type="file"]');
         if (fileInput && fileInput.files[0]) {
           formDataToSend.append("productImage", fileInput.files[0]);
@@ -277,7 +262,6 @@ function AdminProductsPage() {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
-            // Don't set Content-Type - let the browser set it for FormData
           },
           body: formDataToSend,
         });
@@ -310,7 +294,6 @@ function AdminProductsPage() {
         setProducts((prev) => [savedProduct.product || savedProduct, ...prev]);
         showNotification("Product added successfully!", "success");
       }
-
       handleCancel();
     } catch (error) {
       console.error("Submit error:", error);
@@ -318,7 +301,6 @@ function AdminProductsPage() {
     }
   };
 
-  // Filter products
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || product.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -337,7 +319,7 @@ function AdminProductsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-10">
-      {/* Header with Glassmorphism Effect */}
+
       <div className="backdrop-blur-md bg-white/80 rounded-3xl p-8 shadow-xl border border-white/20">
         <div className="flex justify-between items-center">
           <div>
@@ -354,7 +336,7 @@ function AdminProductsPage() {
         </div>
       </div>
 
-      {/* Enhanced Stats Cards */}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="group relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2">
           <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
@@ -382,7 +364,6 @@ function AdminProductsPage() {
         </div>
       </div>
 
-      {/* Enhanced Search and Filter */}
       <div className="backdrop-blur-md bg-white/90 rounded-3xl p-8 shadow-xl border border-white/20">
         <div className="flex flex-col md:flex-row gap-6">
           <div className="relative flex-1">
@@ -401,11 +382,11 @@ function AdminProductsPage() {
         </div>
       </div>
 
-      {/* Enhanced Products Grid */}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredProducts.map((product) => (
           <div key={product._id} className="group bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden border border-white/50 transform hover:scale-105 hover:-translate-y-2">
-            {/* Enhanced Product Image */}
+
             <div className="h-56 relative overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
               {product.imageUrl ? (
                 <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -427,10 +408,9 @@ function AdminProductsPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
 
-            {/* Enhanced Product Details */}
+  
             <div className="p-6">
               {editingProduct === product._id ? (
-                // Enhanced Edit Form
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Product name" className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-300" required />
 
@@ -470,7 +450,7 @@ function AdminProductsPage() {
                     <option value="out_of_stock">Out of Stock</option>
                   </select>
 
-                  {/* Enhanced Sizes */}
+
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-3">Sizes</label>
                     <div className="flex flex-wrap gap-2 mb-3">
@@ -491,7 +471,7 @@ function AdminProductsPage() {
                     </div>
                   </div>
 
-                  {/* Enhanced Colors */}
+      
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-3">Colors</label>
                     <div className="flex flex-wrap gap-2 mb-3">
@@ -525,13 +505,13 @@ function AdminProductsPage() {
                   </div>
                 </form>
               ) : (
-                // Enhanced Display Mode
+        
                 <>
                   <h3 className="font-bold text-xl text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors duration-300">{product.name}</h3>
                   <p className="text-slate-600 text-sm mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
                   <div className="text-3xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">${product.price}</div>
 
-                  {/* Enhanced Sizes and Colors */}
+   
                   {product.sizes && product.sizes.length > 0 && (
                     <div className="mb-3">
                       <span className="text-sm text-slate-500 font-semibold">Sizes: </span>
@@ -573,7 +553,6 @@ function AdminProductsPage() {
         ))}
       </div>
 
-      {/* Enhanced Add Product Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
           <div className="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-4 duration-500">
@@ -622,7 +601,7 @@ function AdminProductsPage() {
                   <option value="out_of_stock">Out of Stock</option>
                 </select>
 
-                {/* Enhanced Sizes */}
+
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-3">Sizes</label>
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -643,7 +622,6 @@ function AdminProductsPage() {
                   </div>
                 </div>
 
-                {/* Enhanced Colors */}
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-3">Colors</label>
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -678,7 +656,6 @@ function AdminProductsPage() {
         </div>
       )}
 
-      {/* Enhanced Empty State */}
       {filteredProducts.length === 0 && !loading && (
         <div className="text-center py-20">
           <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full mb-6">

@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 function ResetPasswordPage() {
-  // 1. Get the userId and token from the URL parameters
+
   const { userId, token } = useParams();
 
-  // 2. State for the form fields and messages
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -19,7 +19,7 @@ function ResetPasswordPage() {
     setError("");
     setMessage("");
 
-    // 3. Frontend validation: Check if passwords match
+
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -32,7 +32,7 @@ function ResetPasswordPage() {
     setLoading(true);
 
     try {
-      // 4. Make the API call to the backend reset endpoint
+
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/reset-password/${userId}/${token}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -44,7 +44,7 @@ function ResetPasswordPage() {
         throw new Error(data.message || "Failed to reset password.");
       }
 
-      // 5. On success, redirect to login with a success message
+
       navigate("/login", { state: { message: data.message } });
     } catch (err) {
       setError(err.message);
@@ -55,26 +55,25 @@ function ResetPasswordPage() {
 
   return (
     <div className="flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-50 -m-4 md:-m-8 relative overflow-hidden" style={{ minHeight: "calc(100vh - 120px)" }}>
-      {/* Enhanced Background */}
+
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-blue-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
 
-        {/* Additional floating elements */}
         <div className="absolute top-1/4 right-1/3 w-28 h-28 bg-gradient-to-br from-violet-300/15 to-indigo-300/15 rounded-full blur-2xl animate-bounce" style={{ animationDuration: "4s" }}></div>
         <div className="absolute bottom-1/4 left-1/3 w-20 h-20 bg-gradient-to-br from-amber-300/20 to-orange-300/20 rounded-full blur-xl animate-ping" style={{ animationDuration: "3.5s" }}></div>
 
-        {/* Floating particles */}
+
         <div className="absolute top-1/3 left-2/3 w-1.5 h-1.5 bg-blue-400/40 rounded-full animate-ping" style={{ animationDelay: "0.3s" }}></div>
         <div className="absolute top-2/3 left-1/5 w-2 h-2 bg-purple-400/35 rounded-full animate-ping" style={{ animationDelay: "1.8s" }}></div>
         <div className="absolute top-1/5 left-1/2 w-1 h-1 bg-cyan-400/45 rounded-full animate-ping" style={{ animationDelay: "2.2s" }}></div>
       </div>
 
-      {/* Enhanced Main Container */}
+
       <div className="w-full max-w-md bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-8 space-y-6 relative z-10 hover:shadow-3xl hover:bg-white/90 transition-all duration-500 hover:scale-[1.02] group animate-in fade-in slide-in-from-bottom duration-700">
-        {/* Enhanced Header */}
+   
         <div className="text-center space-y-4">
-          {/* Lock Icon */}
+ 
           <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 hover:rotate-3 group-hover:animate-pulse">
             <svg className="w-8 h-8 text-white transition-transform duration-300 hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -83,13 +82,12 @@ function ResetPasswordPage() {
 
           <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent hover:from-blue-600 hover:to-purple-600 transition-all duration-500 animate-in slide-in-from-top duration-500">Set a New Password</h1>
 
-          {/* Subtitle */}
           <p className="text-sm text-gray-500 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">Choose a strong password to secure your account</p>
 
           <div className="h-0.5 w-16 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform scale-x-0 group-hover:scale-x-100"></div>
         </div>
 
-        {/* Enhanced Message Display */}
+  
         {message && (
           <div className="p-3 bg-green-50/80 backdrop-blur-sm border border-green-200 rounded-xl animate-in slide-in-from-top duration-300 hover:bg-green-100/80 transition-all duration-200 hover:scale-[1.01]">
             <p className="text-sm text-center text-green-600 font-medium flex items-center justify-center">
@@ -112,9 +110,9 @@ function ResetPasswordPage() {
           </div>
         )}
 
-        {/* Enhanced Form */}
+ 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Enhanced New Password Field */}
+ 
           <div className="group/field animate-in slide-in-from-left duration-500" style={{ animationDelay: "100ms" }}>
             <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2 transition-all duration-200 group-focus-within/field:text-blue-600 group-focus-within/field:translate-x-1">
               <span className="flex items-center">
@@ -134,7 +132,6 @@ function ResetPasswordPage() {
               />
               <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 transform scale-x-0 group-focus-within/field:scale-x-100 transition-transform duration-500 ease-out"></div>
 
-              {/* Password strength indicator */}
               {password && password.length >= 8 && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500 animate-in fade-in zoom-in duration-300">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -144,7 +141,7 @@ function ResetPasswordPage() {
               )}
             </div>
 
-            {/* Password strength bars */}
+
             {password && (
               <div className="mt-2 animate-in slide-in-from-top duration-300">
                 <div className="flex space-x-1">
@@ -157,7 +154,7 @@ function ResetPasswordPage() {
             )}
           </div>
 
-          {/* Enhanced Confirm Password Field */}
+
           <div className="group/field animate-in slide-in-from-left duration-500" style={{ animationDelay: "200ms" }}>
             <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-2 transition-all duration-200 group-focus-within/field:text-blue-600 group-focus-within/field:translate-x-1">
               <span className="flex items-center">
@@ -177,7 +174,7 @@ function ResetPasswordPage() {
               />
               <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 transform scale-x-0 group-focus-within/field:scale-x-100 transition-transform duration-500 ease-out"></div>
 
-              {/* Password match indicator */}
+
               {confirmPassword && password && confirmPassword === password && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500 animate-in fade-in zoom-in duration-300">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -186,7 +183,7 @@ function ResetPasswordPage() {
                 </div>
               )}
 
-              {/* Password mismatch indicator */}
+
               {confirmPassword && password && confirmPassword !== password && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500 animate-in fade-in zoom-in duration-300">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -196,7 +193,7 @@ function ResetPasswordPage() {
               )}
             </div>
 
-            {/* Password match status */}
+  
             {confirmPassword && password && (
               <div className="mt-1 animate-in slide-in-from-top duration-300">
                 <p className={`text-xs ${confirmPassword === password ? "text-green-600" : "text-red-600"}`}>{confirmPassword === password ? "Passwords match" : "Passwords do not match"}</p>
@@ -204,14 +201,14 @@ function ResetPasswordPage() {
             )}
           </div>
 
-          {/* Enhanced Submit Button */}
+
           <button
             type="submit"
             disabled={loading}
             className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl relative overflow-hidden group/btn animate-in slide-in-from-bottom duration-500"
             style={{ animationDelay: "300ms" }}
           >
-            {/* Button shine effect */}
+
             <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"></div>
 
             <span className="flex items-center justify-center relative z-10">
@@ -235,7 +232,7 @@ function ResetPasswordPage() {
           </button>
         </form>
 
-        {/* Security tip */}
+
         <div className="text-center animate-in fade-in duration-500" style={{ animationDelay: "400ms" }}>
           <p className="text-xs text-gray-500">💡 Use a mix of letters, numbers, and symbols for better security</p>
         </div>

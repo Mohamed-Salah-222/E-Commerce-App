@@ -90,7 +90,7 @@ function CheckoutPage() {
   return (
     <div className="flex justify-center items-start py-16 bg-gradient-to-br from-gray-50 via-indigo-50/30 to-purple-50/30 min-h-screen animate-fade-in">
       <div className="w-full max-w-3xl p-10 space-y-8 bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-gray-100 transform hover:shadow-3xl transition-all duration-500 animate-slide-up">
-        {/* Header Section */}
+
         <div className="text-center relative">
           <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-4 w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-expand-width"></div>
 
@@ -98,7 +98,7 @@ function CheckoutPage() {
 
           <p className="mt-4 text-lg text-gray-600 leading-relaxed animate-fade-in-delayed">Please confirm your shipping address to complete your order.</p>
 
-          {/* Progress Indicator */}
+
           <div className="flex justify-center mt-6 space-x-2 animate-fade-in-delayed">
             <div className="w-8 h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
             <div className="w-8 h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
@@ -107,7 +107,7 @@ function CheckoutPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8 animate-form-appear">
-          {/* Street Address */}
+
           <div className="group animate-slide-in-item" style={{ animationDelay: "0.1s" }}>
             <label htmlFor="street" className="block text-sm font-bold text-gray-700 mb-3 group-focus-within:text-indigo-600 transition-colors duration-200 flex items-center space-x-2">
               <span>Street Address</span>
@@ -128,7 +128,7 @@ function CheckoutPage() {
             </div>
           </div>
 
-          {/* City */}
+
           <div className="group animate-slide-in-item" style={{ animationDelay: "0.2s" }}>
             <label htmlFor="city" className="block text-sm font-bold text-gray-700 mb-3 group-focus-within:text-indigo-600 transition-colors duration-200 flex items-center space-x-2">
               <span>City</span>
@@ -140,7 +140,7 @@ function CheckoutPage() {
             </div>
           </div>
 
-          {/* Postal Code & Country Grid */}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-slide-in-item" style={{ animationDelay: "0.3s" }}>
             <div className="group">
               <label htmlFor="postalCode" className="block text-sm font-bold text-gray-700 mb-3 group-focus-within:text-indigo-600 transition-colors duration-200 flex items-center space-x-2">
@@ -183,7 +183,7 @@ function CheckoutPage() {
             </div>
           </div>
 
-          {/* Error Message */}
+
           {error && (
             <div className="animate-shake">
               <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl flex items-center space-x-3">
@@ -197,24 +197,24 @@ function CheckoutPage() {
             </div>
           )}
 
-          {/* Submit Button */}
+
           <div className="pt-4 animate-slide-in-item" style={{ animationDelay: "0.4s" }}>
             <button
               type="submit"
               disabled={loading}
               className="group relative w-full px-8 py-5 font-bold text-lg text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden"
             >
-              {/* Button Background Animation */}
+  
               <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-shimmer-infinite"></div>
 
-              {/* Loading Spinner */}
+
               {loading && (
                 <div className="absolute left-6 top-1/2 transform -translate-y-1/2">
                   <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 </div>
               )}
 
-              {/* Button Content */}
+
               <span className={`relative flex items-center justify-center space-x-3 ${loading ? "ml-8" : ""} transition-all duration-300`}>
                 <span>{loading ? "Processing..." : "Place Order"}</span>
                 {!loading && (
@@ -224,13 +224,12 @@ function CheckoutPage() {
                 )}
               </span>
 
-              {/* Bottom Accent */}
               <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-12 group-hover:w-24 h-1 bg-white/30 rounded-full transition-all duration-300"></div>
             </button>
           </div>
         </form>
 
-        {/* Security Badge */}
+
         <div className="flex justify-center items-center space-x-2 pt-6 text-gray-500 animate-fade-in-delayed">
           <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />

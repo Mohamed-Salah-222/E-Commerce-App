@@ -54,8 +54,6 @@ const orderSchema = new Schema(
       type: String,
       default: null,
     },
-
-    // Payment-related fields
     paymentIntentId: {
       type: String,
       required: true,
@@ -71,8 +69,6 @@ const orderSchema = new Schema(
       type: String,
       default: "card",
     },
-
-    // Shipping address (snapshot at time of order)
     shippingAddress: {
       street: { type: String, required: true },
       city: { type: String, required: true },

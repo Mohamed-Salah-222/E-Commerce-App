@@ -148,7 +148,6 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-// Add a separate endpoint for JSON-based product creation
 app.post("/api/admin/products", authMiddleware, async (req, res) => {
   try {
     const { name, description, price, imageUrl, sizes, colors, status } = req.body;
@@ -175,7 +174,6 @@ app.post("/api/admin/products", authMiddleware, async (req, res) => {
   }
 });
 
-// Keep your existing endpoint for file uploads
 app.post("/api/products", upload.single("productImage"), async (req, res) => {
   try {
     const { name, description, price, sizes, colors } = req.body;
@@ -337,14 +335,7 @@ app.post("/api/cart", authMiddleware, async (req, res) => {
 });
 app.delete("/api/admin/products/:productId", authMiddleware, async (req, res) => {
   try {
-    // Check if user is admin (add your admin check logic here)
-    // if (!req.user.isAdmin) {
-    //   return res.status(403).json({ message: "Admin access required" });
-    // }
-
     const productId = req.params.productId;
-
-    // Delete the actual product from the Product collection
     const deletedProduct = await Product.findByIdAndDelete(productId);
 
     if (!deletedProduct) {
@@ -543,12 +534,10 @@ app.patch("/api/admin/orders/:id", authMiddleware, async (req, res) => {
     if (!orderStatus) {
       return res.status(400).json({ message: "orderStatus is required" });
     }
-
-    // Use findByIdAndUpdate to avoid full document validation
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
       { orderStatus },
-      { new: true, runValidators: false } // Only validate the updated field
+      { new: true, runValidators: false }
     );
 
     if (!updatedOrder) {
@@ -564,22 +553,16 @@ app.patch("/api/admin/orders/:id", authMiddleware, async (req, res) => {
 
 app.patch("/api/admin/user/:id", authMiddleware, async (req, res) => {
   try {
-    // Get the current user (admin) making the request
     const userId = req.user.userId;
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    // Check if the current user is an admin
     if (user.admin === false) {
       return res.status(403).json({ message: "Forbidden: Admin access required" });
     }
-
-    // Get the user to be updated
     const userToUpdateId = req.params.id;
 
-    // Validate the user ID parameter
     if (!userToUpdateId) {
       return res.status(400).json({ message: "User ID parameter is required" });
     }
@@ -589,16 +572,13 @@ app.patch("/api/admin/user/:id", authMiddleware, async (req, res) => {
     if (!userToUpdate) {
       return res.status(404).json({ message: "User to update not found" });
     }
-
-    // Check if user is already an admin
     if (userToUpdate.admin === true) {
       return res.status(400).json({ message: "User is already an admin" });
     }
 
-    // Update the user to admin
     const updatedUser = await User.findByIdAndUpdate(userToUpdateId, { admin: true }, { new: true, runValidators: true }).select("-password");
 
-    // Return success response
+
     res.status(200).json({
       message: "User successfully promoted to admin",
       user: {
@@ -611,7 +591,6 @@ app.patch("/api/admin/user/:id", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error updating user to admin:", error);
 
-    // Handle specific MongoDB errors
     if (error.name === "CastError") {
       return res.status(400).json({ message: "Invalid user ID format" });
     }
@@ -620,31 +599,27 @@ app.patch("/api/admin/user/:id", authMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Validation error", details: error.message });
     }
 
-    // Generic server error
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
 app.get("/api/admin/users", authMiddleware, async (req, res) => {
   try {
-    // Get the current user (admin) making the request
     const userId = req.user.userId;
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if the current user is an admin
     if (user.admin === false) {
       return res.status(403).json({ message: "Forbidden: Admin access required" });
     }
 
-    // Fetch all users, exclude passwords for security, sort by creation date (newest first)
     const users = await User.find()
-      .select("-password") // Exclude password field from response
+      .select("-password") 
       .sort({ createdAt: -1 });
 
-    // Return users with count
+
     res.status(200).json({
       message: "Users retrieved successfully",
       count: users.length,
@@ -653,7 +628,6 @@ app.get("/api/admin/users", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error fetching users:", error);
 
-    // Handle specific MongoDB errors
     if (error.name === "CastError") {
       return res.status(400).json({ message: "Invalid user ID format" });
     }
@@ -662,7 +636,7 @@ app.get("/api/admin/users", authMiddleware, async (req, res) => {
       return res.status(503).json({ message: "Database connection error" });
     }
 
-    // Generic server error
+
     res.status(500).json({ message: "Internal server error" });
   }
 });
@@ -823,16 +797,15 @@ app.post("/api/create-payment-intent", authMiddleware, async (req, res) => {
     const { shippingAddress } = req.body;
     const userId = req.user.userId;
 
-    // Validate shipping address
+
     if (!shippingAddress || !shippingAddress.street || !shippingAddress.city || !shippingAddress.postalCode || !shippingAddress.country || !shippingAddress.phone) {
       return res.status(400).json({ error: "Complete shipping address is required" });
     }
 
-    // Debug: Log userId to ensure it's correct
     console.log("Looking for cart with userId:", userId);
     console.log("userId type:", typeof userId);
 
-    // Fetch user's cart
+
     const cart = await Cart.findOne({ userId }).populate("items.productId");
 
     if (!cart) {
@@ -843,7 +816,6 @@ app.post("/api/create-payment-intent", authMiddleware, async (req, res) => {
       return res.status(400).json({ error: "Cart is empty" });
     }
 
-    // Filter valid items and calculate totals
     const validItems = cart.items.filter((item) => item.productId);
     console.log("Valid items count:", validItems.length);
 
@@ -856,9 +828,9 @@ app.post("/api/create-payment-intent", authMiddleware, async (req, res) => {
     const discountAmount = cart.promoCode === "CROW10" ? cartTotal * 0.1 : 0;
     const discountedTotal = cartTotal - discountAmount;
 
-    // Create payment intent
+
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(discountedTotal * 100), // Convert to cents
+      amount: Math.round(discountedTotal * 100), 
       currency: "usd",
       metadata: {
         userId: userId.toString(),
@@ -878,7 +850,7 @@ app.post("/api/create-payment-intent", authMiddleware, async (req, res) => {
   }
 });
 
-// Confirm payment and create order
+
 app.post("/api/confirm-payment", authMiddleware, async (req, res) => {
   try {
     const { paymentIntentId, shippingAddress } = req.body;
@@ -888,25 +860,24 @@ app.post("/api/confirm-payment", authMiddleware, async (req, res) => {
       return res.status(400).json({ error: "Payment ID and shipping address are required" });
     }
 
-    // Verify payment with Stripe
+
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
     if (paymentIntent.status !== "succeeded") {
       return res.status(400).json({ error: "Payment not successful" });
     }
 
-    // Verify the payment belongs to this user
     if (paymentIntent.metadata.userId !== userId.toString()) {
       return res.status(403).json({ error: "Payment verification failed" });
     }
 
-    // Check if order already exists (prevent duplicate orders)
+
     const existingOrder = await Order.findOne({ paymentIntentId });
     if (existingOrder) {
       return res.status(400).json({ error: "Order already exists for this payment" });
     }
 
-    // Fetch user's cart
+
     const cart = await Cart.findOne({ userId }).populate("items.productId");
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ error: "Cart is empty" });
@@ -914,12 +885,12 @@ app.post("/api/confirm-payment", authMiddleware, async (req, res) => {
 
     const validItems = cart.items.filter((item) => item.productId);
 
-    // Calculate totals
+
     const cartTotal = validItems.reduce((total, item) => total + item.quantity * item.productId.price, 0);
     const discountAmount = cart.promoCode === "CROW10" ? cartTotal * 0.1 : 0;
     const discountedTotal = cartTotal - discountAmount;
 
-    // Create order
+
     const order = new Order({
       userId,
       products: validItems.map((item) => ({
@@ -942,12 +913,12 @@ app.post("/api/confirm-payment", authMiddleware, async (req, res) => {
 
     await order.save();
 
-    // Update user's address
+
     await User.findByIdAndUpdate(userId, {
       address: shippingAddress,
     });
 
-    // Clear the cart
+
     await Cart.findOneAndUpdate({ userId }, { items: [], promoCode: null });
 
     res.json({
@@ -961,7 +932,7 @@ app.post("/api/confirm-payment", authMiddleware, async (req, res) => {
   }
 });
 
-// Get payment status
+
 app.get("/api/payment-status/:paymentIntentId", authMiddleware, async (req, res) => {
   try {
     const { paymentIntentId } = req.params;

@@ -8,8 +8,8 @@ import LoginPage from "./components/LoginPage";
 import CartPage from "./components/CartPage";
 import OrderHistoryPage from "./components/OrderHistoryPage";
 import AdminOrdersPage from "./components/AdminOrdersPage";
-import AdminUsersPage from "./components/AdminUsersPage"; // New admin users component
-import AdminProductsPage from "./components/AdminProductsPage"; // New admin products component
+import AdminUsersPage from "./components/AdminUsersPage"; 
+import AdminProductsPage from "./components/AdminProductsPage"; 
 import ProtectedRoute from "./components/ProtectedRoute";
 import VerifyPage from "./components/VerifyPage";
 import Notification from "./components/Notification";
@@ -29,7 +29,7 @@ function App() {
     navigate("/login");
   };
 
-  const isAdmin = user?.admin === true; // Check if user is admin
+  const isAdmin = user?.admin === true; 
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
@@ -47,7 +47,6 @@ function App() {
             <div className="flex items-center space-x-4">
               {user ? (
                 <>
-                  {/* Admin Navigation */}
                   {isAdmin ? (
                     <>
                       <Link to="/admin/orders" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
@@ -65,7 +64,6 @@ function App() {
                       </span>
                     </>
                   ) : (
-                    /* Regular User Navigation */
                     <>
                       <Link to="/profile" className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">
                         My Profile
@@ -112,7 +110,6 @@ function App() {
           <Route path="/reset-password/:userId/:token" element={<ResetPasswordPage />} />
           <Route path="/auth/google/callback" element={<GoogleAuthCallbackPage />} />
 
-          {/* Regular User Routes */}
           <Route
             path="/cart"
             element={
@@ -146,7 +143,6 @@ function App() {
             }
           />
 
-          {/* Admin Routes */}
           <Route
             path="/admin/orders"
             element={

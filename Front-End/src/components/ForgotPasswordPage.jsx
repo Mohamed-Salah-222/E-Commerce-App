@@ -1,4 +1,4 @@
-// src/components/ForgotPasswordPage.jsx
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -26,7 +26,6 @@ function ForgotPasswordPage() {
         throw new Error(data.message || "Failed to send reset link.");
       }
 
-      // On success, we just show the message from the backend.
       setMessage(data.message);
     } catch (err) {
       setError(err.message);
@@ -37,25 +36,24 @@ function ForgotPasswordPage() {
 
   return (
     <div className="flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-50 -m-4 md:-m-8 relative overflow-hidden" style={{ minHeight: "calc(100vh - 120px)" }}>
-      {/* Enhanced Decorative Background */}
+
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/30 to-purple-400/30 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/30 to-blue-400/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
         <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-gradient-to-br from-pink-300/20 to-orange-300/20 rounded-full blur-2xl animate-bounce opacity-70" style={{ animationDuration: "6s", animationDelay: "2s" }}></div>
 
-        {/* Floating Particles */}
+     
         <div className="absolute top-20 left-10 w-2 h-2 bg-blue-400/60 rounded-full animate-ping" style={{ animationDelay: "0.5s" }}></div>
         <div className="absolute top-40 right-20 w-1.5 h-1.5 bg-purple-400/60 rounded-full animate-ping" style={{ animationDelay: "1.5s" }}></div>
         <div className="absolute bottom-32 left-20 w-3 h-3 bg-cyan-400/60 rounded-full animate-ping" style={{ animationDelay: "2.5s" }}></div>
         <div className="absolute bottom-20 right-40 w-2 h-2 bg-pink-400/60 rounded-full animate-ping" style={{ animationDelay: "3s" }}></div>
       </div>
 
-      {/* Enhanced Main Form Card */}
+  
       <div className="w-full max-w-md bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-2xl p-8 space-y-6 relative z-10 transform transition-all duration-700 hover:shadow-[0_35px_60px_-12px_rgba(0,0,0,0.25)] hover:scale-[1.02] group">
-        {/* Subtle Card Glow Effect */}
+
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
 
-        {/* Enhanced Header with Icon */}
         <div className="text-center space-y-2 transform transition-all duration-500">
           <div className="inline-block p-3 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl mb-4 transform transition-all duration-500 hover:scale-110 hover:rotate-3">
             <svg className="w-8 h-8 text-blue-600 transform transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +66,7 @@ function ForgotPasswordPage() {
           <p className="text-gray-500 text-sm transform transition-all duration-300 hover:text-gray-600">No problem. Enter your email address below and we'll send you a link to reset it.</p>
         </div>
 
-        {/* Enhanced Success Message */}
+
         {message && (
           <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200/50 rounded-xl transform transition-all duration-500 shadow-lg animate-[slideInDown_0.5s_ease-out]">
             <p className="text-sm text-green-700 font-medium flex items-center">
@@ -83,7 +81,7 @@ function ForgotPasswordPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Enhanced Input Group */}
+
           <div className="group">
             <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2 transform transition-all duration-200 group-focus-within:text-blue-600 group-focus-within:scale-105 origin-left">
               Email Address
@@ -98,10 +96,10 @@ function ForgotPasswordPage() {
                 required
                 className="w-full px-4 py-4 pr-12 rounded-xl border border-gray-200 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm hover:bg-white/80 group-hover:border-gray-300 placeholder-gray-400 text-gray-800"
               />
-              {/* Enhanced Animated Underline */}
+
               <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 transform scale-x-0 group-focus-within:scale-x-100 transition-transform duration-500 rounded-full"></div>
 
-              {/* Input Icon */}
+
               <div className="absolute right-4 top-1/2 transform -translate-y-1/2 transition-all duration-300 group-focus-within:text-blue-500 text-gray-400">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -110,7 +108,7 @@ function ForgotPasswordPage() {
             </div>
           </div>
 
-          {/* Enhanced Error Message */}
+
           {error && (
             <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200/50 rounded-xl transform transition-all duration-500 shadow-lg animate-[shake_0.5s_ease-in-out]">
               <p className="text-sm text-red-700 font-medium flex items-center">
@@ -124,13 +122,13 @@ function ForgotPasswordPage() {
             </div>
           )}
 
-          {/* Enhanced Submit Button */}
+
           <button
             type="submit"
             disabled={loading}
             className="w-full px-4 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-blue-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] hover:shadow-2xl relative overflow-hidden group/button"
           >
-            {/* Button Shimmer Effect */}
+
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover/button:translate-x-full transition-transform duration-1000"></div>
 
             <span className="relative flex items-center justify-center space-x-2">
@@ -145,7 +143,7 @@ function ForgotPasswordPage() {
           </button>
         </form>
 
-        {/* Enhanced Footer Link */}
+
         <p className="text-sm text-center text-gray-600 transform transition-all duration-300 hover:scale-105">
           Remembered your password?{" "}
           <Link to="/login" className="font-semibold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text hover:from-blue-700 hover:to-purple-700 transition-all duration-300 relative group/link">
@@ -157,7 +155,7 @@ function ForgotPasswordPage() {
         </p>
       </div>
 
-      {/* Custom CSS Animations */}
+
       <style jsx>{`
         @keyframes gradient-shift {
           0%,

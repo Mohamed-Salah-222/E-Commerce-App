@@ -13,7 +13,6 @@ function AdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
 
-  // Debug logs
   useEffect(() => {
     console.log("AdminUsersPage mounted");
     console.log("Token:", token ? "Present" : "Missing");
@@ -42,7 +41,6 @@ function AdminUsersPage() {
       const data = await response.json();
       console.log("Fetched data:", data);
 
-      // Handle both possible response formats
       const usersList = data.users || data;
       setUsers(Array.isArray(usersList) ? usersList : []);
     } catch (error) {
@@ -73,7 +71,7 @@ function AdminUsersPage() {
         throw new Error(errorData.message || "Failed to promote user");
       }
 
-      // Update local state
+
       setUsers((prevUsers) => prevUsers.map((user) => (user._id === userId ? { ...user, admin: true } : user)));
 
       if (showNotification) {
@@ -89,7 +87,7 @@ function AdminUsersPage() {
     }
   };
 
-  // Filter users
+
   const filteredUsers = users.filter((user) => {
     if (!user) return false;
 
@@ -114,7 +112,7 @@ function AdminUsersPage() {
     }
   };
 
-  // Error boundary
+
   if (error) {
     return (
       <div className="min-h-96 flex items-center justify-center">
@@ -144,7 +142,7 @@ function AdminUsersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 p-6 space-y-10">
-      {/* Enhanced Header */}
+
       <div className="backdrop-blur-md bg-white/80 rounded-3xl p-8 shadow-xl border border-white/20">
         <div className="text-center">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4 tracking-tight">User Management</h1>
@@ -153,7 +151,7 @@ function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Enhanced Stats Cards */}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="group relative overflow-hidden bg-gradient-to-br from-cyan-500 to-blue-600 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2">
           <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
@@ -198,7 +196,7 @@ function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Enhanced Search and Filter */}
+
       <div className="backdrop-blur-md bg-white/90 rounded-3xl p-8 shadow-xl border border-white/20">
         <div className="flex flex-col md:flex-row gap-6 mb-4">
           <div className="relative flex-1">
@@ -226,7 +224,6 @@ function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Enhanced Users Table */}
       <div className="bg-white rounded-3xl shadow-2xl border border-white/50 overflow-hidden">
         {filteredUsers.length === 0 ? (
           <div className="text-center py-20">

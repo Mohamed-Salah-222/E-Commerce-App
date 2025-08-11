@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useNotification } from "../context/NotificationContext"; // 1. Import notification hook
+import { useNotification } from "../context/NotificationContext"; 
 
 function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, token } = useAuth();
-  const { showNotification } = useNotification(); // 2. Get the notification function
+  const { showNotification } = useNotification(); 
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-  // We no longer need the local 'message' state
+
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -26,7 +26,7 @@ function ProductDetailPage() {
         const data = await response.json();
         setProduct(data);
 
-        // Set default selections
+
         if (data.sizes && data.sizes.length > 0) {
           setSelectedSize(data.sizes[0]);
         }
@@ -76,11 +76,11 @@ function ProductDetailPage() {
         throw new Error("Failed to add item to cart.");
       }
 
-      // 3. Use the global notification for success
+
       showNotification(`Added "${product.name}" to your cart!`, "success");
     } catch (error) {
       console.error("Error adding to cart:", error);
-      // And for errors
+
       showNotification(error.message, "error");
     }
   };
@@ -96,7 +96,7 @@ function ProductDetailPage() {
   return (
     <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-8 backdrop-blur-sm bg-opacity-95 transform hover:shadow-3xl transition-all duration-500 animate-fade-in-up border border-gray-100">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-        {/* Image Column */}
+    
         <div className="w-full group">
           <div className="aspect-w-1 aspect-h-1 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden relative shadow-inner">
             <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -109,7 +109,7 @@ function ProductDetailPage() {
           </div>
         </div>
 
-        {/* Details Column */}
+
         <div className="flex flex-col animate-slide-in-right">
           <div className="relative">
             <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 via-indigo-900 to-purple-900 bg-clip-text text-transparent leading-tight">{product.name}</h1>
@@ -124,7 +124,7 @@ function ProductDetailPage() {
           <p className="mt-6 text-gray-600 text-base leading-relaxed opacity-0 animate-fade-in-delayed">{product.description}</p>
 
           <div className="mt-8 space-y-6 animate-slide-up-delayed">
-            {/* Size Selection */}
+
             {product.sizes && product.sizes.length > 0 && (
               <div className="group">
                 <label className="block text-sm font-bold text-gray-700 mb-3 flex items-center space-x-2">
@@ -149,7 +149,6 @@ function ProductDetailPage() {
               </div>
             )}
 
-            {/* Color Selection */}
             {product.colors && product.colors.length > 0 && (
               <div className="group">
                 <label className="block text-sm font-bold text-gray-700 mb-3 flex items-center space-x-2">
@@ -175,7 +174,6 @@ function ProductDetailPage() {
             )}
           </div>
 
-          {/* Add to Cart Button */}
           <div className="mt-10 animate-fade-in-up-delayed">
             <button
               onClick={handleAddToCart}

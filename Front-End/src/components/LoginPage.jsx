@@ -1,4 +1,4 @@
-// src/components/LoginPage.jsx
+
 import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -14,7 +14,7 @@ function LoginPage() {
 
   const successMessage = location.state?.message;
 
-  // Quick login function
+
   const handleQuickLogin = async (userType) => {
     setError("");
     setLoading(true);
@@ -73,24 +73,24 @@ function LoginPage() {
 
   return (
     <div className="flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-50 -m-4 md:-m-8 relative overflow-hidden" style={{ minHeight: "calc(100vh - 120px)" }}>
-      {/* Enhanced Background Blobs */}
+
       <div className="absolute inset-0 -z-10">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-400/20 rounded-full blur-3xl animate-pulse delay-1000" />
 
-        {/* Additional floating elements */}
+
         <div className="absolute top-1/3 left-1/5 w-24 h-24 bg-gradient-to-br from-emerald-300/15 to-teal-300/15 rounded-full blur-2xl animate-bounce" style={{ animationDuration: "4s" }}></div>
         <div className="absolute bottom-1/3 right-1/5 w-16 h-16 bg-gradient-to-br from-rose-300/20 to-pink-300/20 rounded-full blur-xl animate-ping" style={{ animationDuration: "3s" }}></div>
 
-        {/* Floating particles */}
+
         <div className="absolute top-1/4 left-3/4 w-1.5 h-1.5 bg-blue-400/40 rounded-full animate-ping" style={{ animationDelay: "0.5s" }}></div>
         <div className="absolute top-3/4 left-1/4 w-2 h-2 bg-purple-400/35 rounded-full animate-ping" style={{ animationDelay: "1.5s" }}></div>
         <div className="absolute top-1/2 left-1/2 w-1 h-1 bg-cyan-400/45 rounded-full animate-ping" style={{ animationDelay: "2.5s" }}></div>
       </div>
 
-      {/* Enhanced Login Card */}
+
       <div className="w-full max-w-md bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-2xl p-10 space-y-6 relative z-10 transition-all duration-500 hover:shadow-3xl hover:bg-white/95 hover:scale-[1.02] group animate-in fade-in slide-in-from-bottom duration-700">
-        {/* Enhanced Header */}
+
         <div className="text-center space-y-2">
           <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 hover:rotate-3 group-hover:animate-pulse">
             <svg className="w-8 h-8 text-white transition-transform duration-300 hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +101,7 @@ function LoginPage() {
           <div className="h-0.5 w-20 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform scale-x-0 group-hover:scale-x-100"></div>
         </div>
 
-        {/* Enhanced Success Message */}
+
         {successMessage && (
           <div className="p-3 bg-green-50/80 backdrop-blur-sm border border-green-200 rounded-xl animate-in slide-in-from-top duration-300 hover:bg-green-100/80 transition-all duration-200 hover:scale-[1.01]">
             <p className="text-sm text-green-700 font-medium flex items-center">
@@ -113,7 +113,7 @@ function LoginPage() {
           </div>
         )}
 
-        {/* Quick Login Demo Section */}
+
         <div className="bg-gradient-to-r from-amber-50/80 to-orange-50/80 backdrop-blur-sm border border-amber-200/50 rounded-xl p-4 space-y-3 animate-in slide-in-from-top duration-500" style={{ animationDelay: "100ms" }}>
           <div className="text-center">
             <p className="text-xs font-semibold text-amber-700 flex items-center justify-center">
@@ -149,13 +149,13 @@ function LoginPage() {
           </div>
         </div>
 
-        {/* Enhanced Google Sign-in Button */}
+
         <a
           href={`${import.meta.env.VITE_API_URL}/api/auth/google`}
           className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 hover:scale-[1.02] hover:shadow-md group/google relative overflow-hidden animate-in slide-in-from-left duration-500"
           style={{ animationDelay: "200ms" }}
         >
-          {/* Subtle shine effect */}
+
           <div className="absolute inset-0 -translate-x-full group-hover/google:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
 
           <svg className="w-5 h-5 mr-3 transition-transform duration-200 group-hover/google:scale-110" viewBox="0 0 48 48">
@@ -164,7 +164,7 @@ function LoginPage() {
           <span className="relative z-10">Sign in with Google</span>
         </a>
 
-        {/* Enhanced Divider */}
+
         <div className="relative animate-in fade-in duration-500" style={{ animationDelay: "300ms" }}>
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300"></div>
@@ -174,9 +174,8 @@ function LoginPage() {
           </div>
         </div>
 
-        {/* Enhanced Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Enhanced Email Field */}
+
           <div className="group/field animate-in slide-in-from-left duration-500" style={{ animationDelay: "400ms" }}>
             <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1 transition-all duration-200 group-focus-within/field:text-blue-600 group-focus-within/field:translate-x-1">
               <span className="flex items-center">
@@ -196,7 +195,7 @@ function LoginPage() {
               />
               <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 scale-x-0 group-focus-within/field:scale-x-100 transform transition-transform duration-500 ease-out" />
 
-              {/* Success indicator */}
+
               {email && email.includes("@") && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500 animate-in fade-in zoom-in duration-300">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -207,7 +206,7 @@ function LoginPage() {
             </div>
           </div>
 
-          {/* Enhanced Password Field */}
+
           <div className="group/field animate-in slide-in-from-left duration-500" style={{ animationDelay: "500ms" }}>
             <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1 transition-all duration-200 group-focus-within/field:text-blue-600 group-focus-within/field:translate-x-1">
               <span className="flex items-center">
@@ -227,7 +226,7 @@ function LoginPage() {
               />
               <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 scale-x-0 group-focus-within/field:scale-x-100 transform transition-transform duration-500 ease-out" />
 
-              {/* Success indicator */}
+
               {password && password.length >= 1 && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500 animate-in fade-in zoom-in duration-300">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -237,7 +236,6 @@ function LoginPage() {
               )}
             </div>
 
-            {/* Enhanced Forgot Password Link */}
             <div className="text-right mt-2">
               <Link to="/forgot-password" className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline transition-all duration-200 relative group/forgot inline-block">
                 <span className="relative z-10 transition-transform duration-200 group-hover/forgot:translate-x-0.5">Forgot Password?</span>
@@ -246,7 +244,6 @@ function LoginPage() {
             </div>
           </div>
 
-          {/* Enhanced Error Message */}
           {error && (
             <div className="p-3 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl animate-in slide-in-from-top duration-300 hover:bg-red-100/80 transition-all duration-200 hover:scale-[1.01]">
               <p className="text-sm text-red-700 font-medium flex items-center">
@@ -258,14 +255,14 @@ function LoginPage() {
             </div>
           )}
 
-          {/* Enhanced Submit Button */}
+
           <button
             type="submit"
             disabled={loading}
             className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group/btn animate-in slide-in-from-bottom duration-500"
             style={{ animationDelay: "600ms" }}
           >
-            {/* Button shine effect */}
+
             <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"></div>
 
             <span className="flex items-center justify-center relative z-10">
@@ -289,7 +286,7 @@ function LoginPage() {
           </button>
         </form>
 
-        {/* Enhanced Footer */}
+
         <p className="text-sm text-center text-gray-600 animate-in fade-in duration-500" style={{ animationDelay: "700ms" }}>
           Need an account?{" "}
           <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-700 transition-all duration-200 hover:underline relative group/link inline-block">

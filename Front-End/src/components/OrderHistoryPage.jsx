@@ -57,10 +57,9 @@ function OrderHistoryPage() {
         <div className="space-y-8">
           {orders.map((order, orderIndex) => (
             <div key={order._id} className="group bg-white p-8 rounded-3xl shadow-xl border-2 border-gray-100 hover:border-indigo-200 hover:shadow-2xl transform hover:scale-[1.01] transition-all duration-500 backdrop-blur-sm bg-opacity-95 animate-slide-up overflow-hidden relative" style={{ animationDelay: `${orderIndex * 0.1}s` }}>
-              {/* Background Gradient */}
+
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-indigo-50 to-purple-50 rounded-full transform translate-x-16 -translate-y-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-              {/* Order Header */}
               <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b-2 border-gradient-to-r from-gray-100 to-gray-200 pb-6 mb-6 relative">
                 <div className="absolute left-0 bottom-0 w-0 group-hover:w-20 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"></div>
 
@@ -76,7 +75,7 @@ function OrderHistoryPage() {
                 </div>
               </div>
 
-              {/* Order Body */}
+
               <div className="space-y-6">
                 {order.products.map((item, itemIndex) => (
                   <div key={item.productId?._id || item._id} className="flex items-center space-x-6 p-4 rounded-xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-indigo-50 transition-all duration-300 group/item animate-fade-in-item" style={{ animationDelay: `${orderIndex * 0.1 + itemIndex * 0.05}s` }}>
@@ -105,7 +104,7 @@ function OrderHistoryPage() {
                 ))}
               </div>
 
-              {/* Order Footer */}
+
               <div className="border-t-2 border-gray-100 mt-8 pt-6 relative">
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
 
@@ -144,8 +143,6 @@ function OrderHistoryPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Corner Decoration */}
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/5 to-transparent rounded-full transform -translate-x-12 translate-y-12 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </div>
           ))}

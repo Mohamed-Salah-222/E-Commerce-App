@@ -19,7 +19,6 @@ function UserProfilePage() {
   });
   const [loading, setLoading] = useState(true);
 
-  // Fetch the user's current profile data when the page loads
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (!token) return;
@@ -29,7 +28,7 @@ function UserProfilePage() {
         });
         if (!response.ok) throw new Error("Failed to fetch profile.");
         const data = await response.json();
-        // Set the form state with the fetched data
+
         setProfile({
           username: data.username || "",
           email: data.email || "",
@@ -45,10 +44,10 @@ function UserProfilePage() {
     fetchUserProfile();
   }, [token]);
 
-  // Handle changes in any of the form input fields
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // If the input is part of the nested address object
+
     if (["street", "city", "postalCode", "country", "phone"].includes(name)) {
       setProfile((prevProfile) => ({
         ...prevProfile,
@@ -58,7 +57,7 @@ function UserProfilePage() {
         },
       }));
     } else {
-      // For top-level fields like username and phone
+
       setProfile((prevProfile) => ({
         ...prevProfile,
         [name]: value,
@@ -66,7 +65,7 @@ function UserProfilePage() {
     }
   };
 
-  // Handle form submission to update the profile
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -83,7 +82,7 @@ function UserProfilePage() {
       });
       if (!response.ok) throw new Error("Failed to update profile.");
 
-      // Refresh user data in auth context to update navbar
+
       await refetchUser();
 
       showNotification("Profile updated successfully!", "success");
@@ -103,7 +102,7 @@ function UserProfilePage() {
 
         <div className="bg-white p-8 rounded-2xl shadow-2xl border border-gray-100 backdrop-blur-sm bg-opacity-95 transform hover:scale-[1.02] transition-all duration-300 animate-slide-up">
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Personal Information Section */}
+
             <div className="space-y-6">
               <div className="flex items-center space-x-3 mb-6">
                 <div className="w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full"></div>
@@ -111,7 +110,7 @@ function UserProfilePage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Username */}
+  
                 <div className="group">
                   <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2 group-focus-within:text-indigo-600 transition-colors duration-200">
                     Username
@@ -122,7 +121,6 @@ function UserProfilePage() {
                   </div>
                 </div>
 
-                {/* Email (Read-only) */}
                 <div className="group">
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                     Email
@@ -136,7 +134,7 @@ function UserProfilePage() {
                 </div>
               </div>
 
-              {/* Phone */}
+      
               <div className="group">
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2 group-focus-within:text-indigo-600 transition-colors duration-200">
                   Phone Number
@@ -148,7 +146,7 @@ function UserProfilePage() {
               </div>
             </div>
 
-            {/* Divider */}
+     
             <div className="relative my-8">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
@@ -160,14 +158,13 @@ function UserProfilePage() {
               </div>
             </div>
 
-            {/* Shipping Address Section */}
+
             <div className="space-y-6">
               <div className="flex items-center space-x-3 mb-6">
                 <div className="w-1 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
                 <h2 className="text-xl font-semibold text-gray-800">Shipping Address</h2>
               </div>
 
-              {/* Street Address */}
               <div className="group">
                 <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-2 group-focus-within:text-indigo-600 transition-colors duration-200">
                   Street Address
@@ -178,7 +175,7 @@ function UserProfilePage() {
                 </div>
               </div>
 
-              {/* City, Postal Code, Country */}
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="group">
                   <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2 group-focus-within:text-indigo-600 transition-colors duration-200">
@@ -212,7 +209,7 @@ function UserProfilePage() {
               </div>
             </div>
 
-            {/* Submit Button */}
+
             <div className="pt-8 text-right">
               <button type="submit" className="group relative px-8 py-4 font-semibold text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 transform hover:scale-105 active:scale-95 transition-all duration-200 shadow-xl hover:shadow-2xl focus:ring-4 focus:ring-purple-200 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>

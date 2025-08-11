@@ -1,4 +1,4 @@
-// src/components/VerifyPage.jsx
+
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -7,7 +7,7 @@ function VerifyPage() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false); // To disable button while resending
+  const [loading, setLoading] = useState(false); 
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -42,17 +42,16 @@ function VerifyPage() {
     }
   };
 
-  // --- NEW FUNCTION FOR RESENDING THE CODE ---
+
   const handleResend = async () => {
     setError("");
     setMessage("Sending a new code...");
     try {
-      // We call the register endpoint again. The backend logic will find the
-      // unverified user and send them a new code.
+ 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // We need to send a dummy password/username as they are required by the backend
+  
         body: JSON.stringify({ email, password: "dummyPassword", username: "dummyUser" }),
       });
       const data = await response.json();
@@ -65,16 +64,16 @@ function VerifyPage() {
 
   return (
     <div className="flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-50 -m-4 md:-m-8 relative overflow-hidden" style={{ minHeight: "calc(100vh - 120px)" }}>
-      {/* Enhanced Background */}
+
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-blue-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
 
-        {/* Additional floating elements */}
+
         <div className="absolute top-1/3 right-1/4 w-32 h-32 bg-gradient-to-br from-green-300/15 to-emerald-300/15 rounded-full blur-2xl animate-bounce" style={{ animationDuration: "3.5s" }}></div>
         <div className="absolute bottom-1/3 left-1/4 w-24 h-24 bg-gradient-to-br from-yellow-300/20 to-amber-300/20 rounded-full blur-xl animate-ping" style={{ animationDuration: "4s" }}></div>
 
-        {/* Floating email icons */}
+
         <div className="absolute top-1/4 left-1/3 opacity-10 animate-float" style={{ animationDelay: "0s", animationDuration: "6s" }}>
           <svg className="w-8 h-8 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
             <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
@@ -89,9 +88,9 @@ function VerifyPage() {
         </div>
       </div>
 
-      {/* Enhanced Main Container */}
+
       <div className="w-full max-w-md bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-8 space-y-6 relative z-10 hover:shadow-3xl hover:bg-white/90 transition-all duration-500 hover:scale-[1.02] group animate-in fade-in slide-in-from-bottom duration-700">
-        {/* Enhanced Header */}
+
         <div className="text-center space-y-2">
           <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 hover:rotate-3 group-hover:animate-pulse">
             <svg className="w-8 h-8 text-white transition-transform duration-300 hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +102,7 @@ function VerifyPage() {
           <div className="h-0.5 w-20 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform scale-x-0 group-hover:scale-x-100"></div>
         </div>
 
-        {/* Enhanced Message Display */}
+
         {message && (
           <div className="p-3 bg-blue-50/80 backdrop-blur-sm border border-blue-200 rounded-xl animate-in slide-in-from-top duration-300 hover:bg-blue-100/80 transition-all duration-200 hover:scale-[1.01]">
             <p className="text-sm text-blue-700 font-medium flex items-center justify-center">
@@ -115,9 +114,9 @@ function VerifyPage() {
           </div>
         )}
 
-        {/* Enhanced Form */}
+
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Enhanced Verification Code Field */}
+
           <div className="group/field animate-in slide-in-from-bottom duration-500" style={{ animationDelay: "100ms" }}>
             <label htmlFor="verificationCode" className="block text-sm font-semibold text-gray-700 mb-3 text-center transition-all duration-200 group-focus-within/field:text-blue-600">
               <span className="flex items-center justify-center">
@@ -139,7 +138,7 @@ function VerifyPage() {
               />
               <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 transform scale-x-0 group-focus-within/field:scale-x-100 transition-transform duration-500 ease-out rounded-full mx-4"></div>
 
-              {/* Code completion indicator */}
+
               {verificationCode && verificationCode.length === 6 && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500 animate-in fade-in zoom-in duration-300">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -153,7 +152,7 @@ function VerifyPage() {
               Check your email for the 6-digit code
             </p>
 
-            {/* Progress dots for code length */}
+
             <div className="flex justify-center mt-3 space-x-2">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className={`w-2 h-2 rounded-full transition-all duration-300 ${i < verificationCode.length ? "bg-blue-500 scale-110" : "bg-gray-300 scale-100"}`} />
@@ -161,7 +160,7 @@ function VerifyPage() {
             </div>
           </div>
 
-          {/* Enhanced Error Message */}
+
           {error && (
             <div className="p-3 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-xl animate-in slide-in-from-top duration-300 hover:bg-red-100/80 transition-all duration-200 hover:scale-[1.01]">
               <p className="text-sm text-red-700 font-medium flex items-center justify-center">
@@ -173,14 +172,14 @@ function VerifyPage() {
             </div>
           )}
 
-          {/* Enhanced Submit Button */}
+
           <button
             type="submit"
             disabled={loading}
             className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group/btn animate-in slide-in-from-bottom duration-500"
             style={{ animationDelay: "300ms" }}
           >
-            {/* Button shine effect */}
+     
             <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"></div>
 
             <span className="flex items-center justify-center relative z-10">
@@ -204,7 +203,7 @@ function VerifyPage() {
           </button>
         </form>
 
-        {/* Enhanced Footer */}
+
         <div className="text-center animate-in fade-in duration-500" style={{ animationDelay: "400ms" }}>
           <p className="text-sm text-gray-600">
             Didn't receive the code?{" "}
@@ -215,13 +214,13 @@ function VerifyPage() {
           </p>
         </div>
 
-        {/* Tips section */}
+
         <div className="text-center animate-in fade-in duration-500" style={{ animationDelay: "500ms" }}>
           <p className="text-xs text-gray-400">💡 Check your spam folder if you don't see the email</p>
         </div>
       </div>
 
-      {/* Custom CSS for floating animation */}
+
       <style jsx>{`
         @keyframes float {
           0%,

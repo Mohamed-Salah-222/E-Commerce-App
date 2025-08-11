@@ -56,9 +56,9 @@ function HomePage() {
 
   return (
     <div className="space-y-32 overflow-hidden pt-4">
-      {/* --- Hero Section --- */}
+
       <div className="relative text-center py-24 px-4 bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-3xl shadow-xl overflow-hidden animate-fade-in-up">
-        {/* Background Decorations */}
+
         <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-indigo-200/30 to-purple-200/30 rounded-full transform -translate-x-48 -translate-y-48 animate-float"></div>
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-tl from-purple-200/30 to-pink-200/30 rounded-full transform translate-x-40 translate-y-40 animate-float-delayed"></div>
 
@@ -83,7 +83,6 @@ function HomePage() {
         </div>
       </div>
 
-      {/* --- Main Products Section --- */}
       <div className="animate-slide-in-up">
         <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-6">
           <div className="relative">
@@ -115,9 +114,9 @@ function HomePage() {
         </div>
       </div>
 
-      {/* --- Promo Code Section --- */}
+
       <div className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 py-16 px-8 text-center rounded-3xl shadow-2xl overflow-hidden animate-bounce-in transform hover:scale-[1.02] transition-all duration-500">
-        {/* Background Animations */}
+
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/10 via-transparent to-white/10 animate-shimmer-infinite"></div>
         <div className="absolute top-4 left-4 w-8 h-8 bg-white/20 rounded-full animate-float"></div>
         <div className="absolute bottom-4 right-4 w-6 h-6 bg-white/20 rounded-full animate-float-delayed"></div>
@@ -135,7 +134,7 @@ function HomePage() {
         </div>
       </div>
 
-      {/* --- Customer Reviews Section --- */}
+
       <div className="max-w-7xl mx-auto px-4 animate-fade-in-up-delayed">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4 text-transparent bg-gradient-to-r from-gray-800 to-indigo-600 bg-clip-text">What Our Customers Say</h2>
@@ -148,10 +147,10 @@ function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {reviews.map((review, index) => (
             <div key={index} className="group relative bg-white p-8 rounded-2xl shadow-xl border-t-4 border-indigo-500 transform hover:scale-105 hover:-translate-y-2 transition-all duration-500 hover:shadow-2xl animate-review-card overflow-hidden" style={{ animationDelay: `${index * 0.2}s` }}>
-              {/* Background Decoration */}
+
               <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-50 to-purple-50 rounded-full transform translate-x-10 -translate-y-10 group-hover:scale-150 transition-transform duration-500"></div>
 
-              {/* Quote Icon */}
+
               <div className="absolute top-4 left-4 text-indigo-200 text-4xl font-serif transform group-hover:scale-110 transition-transform duration-300">"</div>
 
               <div className="relative z-10">
@@ -162,7 +161,7 @@ function HomePage() {
                   <p className="text-lg font-bold text-gray-900">{review.name}</p>
                 </div>
 
-                {/* Star Rating Visual */}
+
                 <div className="flex justify-end mt-2 space-x-1">
                   {[...Array(5)].map((_, i) => (
                     <div key={i} className="w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-star-twinkle" style={{ animationDelay: `${i * 0.1}s` }}></div>
