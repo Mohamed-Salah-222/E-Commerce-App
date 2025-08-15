@@ -171,13 +171,35 @@ app.post("/api/admin/products", authMiddleware, upload.single("productImage"), a
       finalImageUrl = result.secure_url;
     }
 
+    // FIX: Handle both string and array formats for sizes/colors
+    let sizesArray = [];
+    let colorsArray = [];
+
+    if (typeof sizes === "string") {
+      sizesArray = sizes
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s !== "");
+    } else if (Array.isArray(sizes)) {
+      sizesArray = sizes.filter((s) => s.trim() !== "");
+    }
+
+    if (typeof colors === "string") {
+      colorsArray = colors
+        .split(",")
+        .map((c) => c.trim())
+        .filter((c) => c !== "");
+    } else if (Array.isArray(colors)) {
+      colorsArray = colors.filter((c) => c.trim() !== "");
+    }
+
     const newProduct = new Product({
       name: name.trim(),
       description: description?.trim() || "",
       price: parseFloat(price),
       imageUrl: finalImageUrl,
-      sizes: Array.isArray(sizes) ? sizes : [],
-      colors: Array.isArray(colors) ? colors : [],
+      sizes: sizesArray,
+      colors: colorsArray,
       status: status || "available",
     });
 
