@@ -94,12 +94,10 @@ function AdminProductsPage() {
     const file = e.target.files[0];
     if (!file) return;
 
-
     if (!file.type.startsWith("image/")) {
       showNotification("Please select an image file", "error");
       return;
     }
-
 
     if (file.size > 5 * 1024 * 1024) {
       showNotification("Image size should be less than 5MB", "error");
@@ -109,7 +107,6 @@ function AdminProductsPage() {
     setUploadingImage(true);
 
     try {
-
       const reader = new FileReader();
       reader.onload = (event) => {
         setFormData((prev) => ({
@@ -119,7 +116,6 @@ function AdminProductsPage() {
         setUploadingImage(false);
       };
       reader.readAsDataURL(file);
-
     } catch (error) {
       console.error("Image upload error:", error);
       showNotification("Failed to upload image", "error");
@@ -186,7 +182,6 @@ function AdminProductsPage() {
         throw new Error(errorMessage);
       }
 
-
       setProducts((prev) => prev.filter((p) => p._id !== productId));
       showNotification("Product deleted successfully!", "success");
     } catch (error) {
@@ -203,7 +198,6 @@ function AdminProductsPage() {
       return;
     }
 
-
     const price = parseFloat(formData.price);
     if (isNaN(price) || price < 0) {
       showNotification("Please enter a valid price", "error");
@@ -214,7 +208,6 @@ function AdminProductsPage() {
       let response;
 
       if (editingProduct) {
-
         const submitData = {
           name: formData.name.trim(),
           description: formData.description.trim(),
@@ -234,13 +227,13 @@ function AdminProductsPage() {
           body: JSON.stringify(submitData),
         });
       } else {
-
+        // Creating new product
         const formDataToSend = new FormData();
 
         formDataToSend.append("name", formData.name.trim());
         formDataToSend.append("description", formData.description.trim());
         formDataToSend.append("price", price.toString());
-
+        formDataToSend.append("status", formData.status);
 
         if (formData.sizes.length > 0) {
           formDataToSend.append("sizes", formData.sizes.join(","));
@@ -249,16 +242,18 @@ function AdminProductsPage() {
           formDataToSend.append("colors", formData.colors.join(","));
         }
 
-
         const fileInput = document.querySelector('input[type="file"]');
         if (fileInput && fileInput.files[0]) {
           formDataToSend.append("productImage", fileInput.files[0]);
-        } else if (!formData.imageUrl) {
-          showNotification("Please select an image file", "error");
+        } else if (formData.imageUrl) {
+          formDataToSend.append("imageUrl", formData.imageUrl.trim());
+        } else {
+          showNotification("Please select an image file or provide image URL", "error");
           return;
         }
 
-        response = await fetch(`${import.meta.env.VITE_API_URL}/api/products`, {
+        // FIXED ENDPOINT:
+        response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/products`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -319,7 +314,6 @@ function AdminProductsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 space-y-10">
-
       <div className="backdrop-blur-md bg-white/80 rounded-3xl p-8 shadow-xl border border-white/20">
         <div className="flex justify-between items-center">
           <div>
@@ -335,7 +329,6 @@ function AdminProductsPage() {
           </button>
         </div>
       </div>
-
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="group relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2">
@@ -382,11 +375,9 @@ function AdminProductsPage() {
         </div>
       </div>
 
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredProducts.map((product) => (
           <div key={product._id} className="group bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden border border-white/50 transform hover:scale-105 hover:-translate-y-2">
-
             <div className="h-56 relative overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
               {product.imageUrl ? (
                 <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -408,7 +399,6 @@ function AdminProductsPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
 
-  
             <div className="p-6">
               {editingProduct === product._id ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -450,7 +440,6 @@ function AdminProductsPage() {
                     <option value="out_of_stock">Out of Stock</option>
                   </select>
 
-
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-3">Sizes</label>
                     <div className="flex flex-wrap gap-2 mb-3">
@@ -471,7 +460,6 @@ function AdminProductsPage() {
                     </div>
                   </div>
 
-      
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-3">Colors</label>
                     <div className="flex flex-wrap gap-2 mb-3">
@@ -505,13 +493,11 @@ function AdminProductsPage() {
                   </div>
                 </form>
               ) : (
-        
                 <>
                   <h3 className="font-bold text-xl text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors duration-300">{product.name}</h3>
                   <p className="text-slate-600 text-sm mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
                   <div className="text-3xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">${product.price}</div>
 
-   
                   {product.sizes && product.sizes.length > 0 && (
                     <div className="mb-3">
                       <span className="text-sm text-slate-500 font-semibold">Sizes: </span>
@@ -600,7 +586,6 @@ function AdminProductsPage() {
                   <option value="available">Available</option>
                   <option value="out_of_stock">Out of Stock</option>
                 </select>
-
 
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-3">Sizes</label>

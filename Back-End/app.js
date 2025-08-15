@@ -10,6 +10,7 @@ const { sendVerificationEmail, sendPasswordResetEmail } = require("./services/em
 const passport = require("passport");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
+const cloudinary = require("cloudinary").v2;
 const User = require("./models/user");
 const Product = require("./models/product");
 const Cart = require("./models/cart");
@@ -24,6 +25,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(passport.initialize());
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -148,7 +154,7 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-app.post("/api/admin/products", authMiddleware, async (req, res) => {
+app.post("/api/admin/products", authMiddleware, upload.single("productImage"), async (req, res) => {
   try {
     const { name, description, price, imageUrl, sizes, colors, status } = req.body;
 
@@ -156,11 +162,20 @@ app.post("/api/admin/products", authMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Name and price are required." });
     }
 
+    let finalImageUrl = imageUrl?.trim() || "";
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "products",
+      });
+      finalImageUrl = result.secure_url;
+    }
+
     const newProduct = new Product({
       name: name.trim(),
       description: description?.trim() || "",
       price: parseFloat(price),
-      imageUrl: imageUrl?.trim() || "",
+      imageUrl: finalImageUrl,
       sizes: Array.isArray(sizes) ? sizes : [],
       colors: Array.isArray(colors) ? colors : [],
       status: status || "available",
@@ -168,39 +183,6 @@ app.post("/api/admin/products", authMiddleware, async (req, res) => {
 
     const savedProduct = await newProduct.save();
     res.status(201).json({ product: savedProduct });
-  } catch (error) {
-    console.error("Error creating product:", error);
-    res.status(500).json({ message: "Server error while creating product." });
-  }
-});
-
-app.post("/api/products", upload.single("productImage"), async (req, res) => {
-  try {
-    const { name, description, price, sizes, colors } = req.body;
-
-    if (!req.file) {
-      return res.status(400).json({ message: "Product image is required." });
-    }
-
-    if (!name || !price) {
-      return res.status(400).json({ message: "Name and price are required." });
-    }
-
-    const imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
-    const sizesArray = sizes ? sizes.split(",").map((s) => s.trim()) : [];
-    const colorsArray = colors ? colors.split(",").map((c) => c.trim()) : [];
-
-    const newProduct = new Product({
-      name,
-      description,
-      price,
-      imageUrl,
-      sizes: sizesArray,
-      colors: colorsArray,
-    });
-
-    const savedProduct = await newProduct.save();
-    res.status(201).json(savedProduct);
   } catch (error) {
     console.error("Error creating product:", error);
     res.status(500).json({ message: "Server error while creating product." });
@@ -534,11 +516,7 @@ app.patch("/api/admin/orders/:id", authMiddleware, async (req, res) => {
     if (!orderStatus) {
       return res.status(400).json({ message: "orderStatus is required" });
     }
-    const updatedOrder = await Order.findByIdAndUpdate(
-      orderId,
-      { orderStatus },
-      { new: true, runValidators: false }
-    );
+    const updatedOrder = await Order.findByIdAndUpdate(orderId, { orderStatus }, { new: true, runValidators: false });
 
     if (!updatedOrder) {
       return res.status(404).json({ message: "Order not found" });
@@ -578,7 +556,6 @@ app.patch("/api/admin/user/:id", authMiddleware, async (req, res) => {
 
     const updatedUser = await User.findByIdAndUpdate(userToUpdateId, { admin: true }, { new: true, runValidators: true }).select("-password");
 
-
     res.status(200).json({
       message: "User successfully promoted to admin",
       user: {
@@ -615,10 +592,7 @@ app.get("/api/admin/users", authMiddleware, async (req, res) => {
       return res.status(403).json({ message: "Forbidden: Admin access required" });
     }
 
-    const users = await User.find()
-      .select("-password") 
-      .sort({ createdAt: -1 });
-
+    const users = await User.find().select("-password").sort({ createdAt: -1 });
 
     res.status(200).json({
       message: "Users retrieved successfully",
@@ -635,7 +609,6 @@ app.get("/api/admin/users", authMiddleware, async (req, res) => {
     if (error.name === "MongoError" || error.name === "MongoServerError") {
       return res.status(503).json({ message: "Database connection error" });
     }
-
 
     res.status(500).json({ message: "Internal server error" });
   }
@@ -797,14 +770,12 @@ app.post("/api/create-payment-intent", authMiddleware, async (req, res) => {
     const { shippingAddress } = req.body;
     const userId = req.user.userId;
 
-
     if (!shippingAddress || !shippingAddress.street || !shippingAddress.city || !shippingAddress.postalCode || !shippingAddress.country || !shippingAddress.phone) {
       return res.status(400).json({ error: "Complete shipping address is required" });
     }
 
     console.log("Looking for cart with userId:", userId);
     console.log("userId type:", typeof userId);
-
 
     const cart = await Cart.findOne({ userId }).populate("items.productId");
 
@@ -828,9 +799,8 @@ app.post("/api/create-payment-intent", authMiddleware, async (req, res) => {
     const discountAmount = cart.promoCode === "CROW10" ? cartTotal * 0.1 : 0;
     const discountedTotal = cartTotal - discountAmount;
 
-
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(discountedTotal * 100), 
+      amount: Math.round(discountedTotal * 100),
       currency: "usd",
       metadata: {
         userId: userId.toString(),
@@ -850,7 +820,6 @@ app.post("/api/create-payment-intent", authMiddleware, async (req, res) => {
   }
 });
 
-
 app.post("/api/confirm-payment", authMiddleware, async (req, res) => {
   try {
     const { paymentIntentId, shippingAddress } = req.body;
@@ -859,7 +828,6 @@ app.post("/api/confirm-payment", authMiddleware, async (req, res) => {
     if (!paymentIntentId || !shippingAddress) {
       return res.status(400).json({ error: "Payment ID and shipping address are required" });
     }
-
 
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
@@ -871,12 +839,10 @@ app.post("/api/confirm-payment", authMiddleware, async (req, res) => {
       return res.status(403).json({ error: "Payment verification failed" });
     }
 
-
     const existingOrder = await Order.findOne({ paymentIntentId });
     if (existingOrder) {
       return res.status(400).json({ error: "Order already exists for this payment" });
     }
-
 
     const cart = await Cart.findOne({ userId }).populate("items.productId");
     if (!cart || cart.items.length === 0) {
@@ -885,11 +851,9 @@ app.post("/api/confirm-payment", authMiddleware, async (req, res) => {
 
     const validItems = cart.items.filter((item) => item.productId);
 
-
     const cartTotal = validItems.reduce((total, item) => total + item.quantity * item.productId.price, 0);
     const discountAmount = cart.promoCode === "CROW10" ? cartTotal * 0.1 : 0;
     const discountedTotal = cartTotal - discountAmount;
-
 
     const order = new Order({
       userId,
@@ -913,11 +877,9 @@ app.post("/api/confirm-payment", authMiddleware, async (req, res) => {
 
     await order.save();
 
-
     await User.findByIdAndUpdate(userId, {
       address: shippingAddress,
     });
-
 
     await Cart.findOneAndUpdate({ userId }, { items: [], promoCode: null });
 
@@ -931,7 +893,6 @@ app.post("/api/confirm-payment", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Order creation failed" });
   }
 });
-
 
 app.get("/api/payment-status/:paymentIntentId", authMiddleware, async (req, res) => {
   try {
