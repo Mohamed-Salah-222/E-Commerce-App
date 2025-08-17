@@ -42,8 +42,7 @@ const registerUser = async (req, res) => {
     }
     res.status(201).json({ message: "Registration successful! Please check your email for a verification code." });
   } catch (error) {
-    console.error("Error during registration process:", error);
-    res.status(500).json({ message: "Server error during registration." });
+    next(error);
   }
 };
 //*---------------------------------------------------------------------------------Verify---------------------------------------------------------------------------------
@@ -69,8 +68,7 @@ const verifyUser = async (req, res) => {
     await user.save();
     res.status(200).json({ message: "Account verified successfully! You can now log in." });
   } catch (error) {
-    console.error("Error during account verification:", error);
-    res.status(500).json({ message: "Server error during verification." });
+    next(error);
   }
 };
 //*---------------------------------------------------------------------------------Login---------------------------------------------------------------------------------
@@ -91,8 +89,8 @@ const loginUser = async (req, res) => {
     const payload = { userId: user._id, email: user.email, username: user.username };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
     res.status(200).json({ message: "Logged in successfully!", token });
-  } catch (err) {
-    res.status(500).json({ message: "Server error during login." });
+  } catch (error) {
+    next(error);
   }
 };
 //*---------------------------------------------------------------------------Forgot-Password--------------------------------------------------------------------------------
@@ -113,8 +111,7 @@ const forgotPassword = async (req, res) => {
     await sendPasswordResetEmail(user.email, user._id, token);
     res.status(200).json({ message: "If an account with that email exists, a password reset link has been sent." });
   } catch (error) {
-    console.error("Error in forgot password process:", error);
-    res.status(500).json({ message: "An error occurred. Please try again later." });
+    next(error);
   }
 };
 //*-------------------------------------------------------------------------------Reset-Password------------------------------------------------------------------------------
@@ -136,8 +133,7 @@ const resetPassword = async (req, res) => {
     await user.save();
     res.status(200).json({ message: "Password has been reset successfully." });
   } catch (error) {
-    console.error("Error resetting password:", error);
-    res.status(400).json({ message: "Invalid or expired password reset link." });
+    next(error);
   }
 };
 //*-------------------------------------------------------------------------------Google------------------------------------------------------------------------------
@@ -164,8 +160,7 @@ const getFreshUser = async (req, res) => {
       admin: user.admin,
     });
   } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ message: "Failed to fetch user data" });
+    next(error);
   }
 };
 module.exports = {

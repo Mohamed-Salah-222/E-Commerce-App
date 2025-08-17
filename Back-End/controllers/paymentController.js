@@ -39,8 +39,7 @@ const createPaymentIntent = async (req, res) => {
       amount: discountedTotal,
     });
   } catch (error) {
-    console.error("Payment intent creation error:", error);
-    res.status(500).json({ error: "Payment creation failed" });
+    next(error);
   }
 };
 //*------------------------------------------------------------------------------Confirm Payment-------------------------------------------------------------------------------
@@ -100,8 +99,7 @@ const confirmPayment = async (req, res) => {
       message: "Order created successfully",
     });
   } catch (error) {
-    console.error("Payment confirmation error:", error);
-    res.status(500).json({ error: "Order creation failed" });
+    next(error);
   }
 };
 
@@ -114,8 +112,7 @@ const paymentStatus = async (req, res) => {
       amount: paymentIntent.amount,
     });
   } catch (error) {
-    console.error("Payment status check error:", error);
-    res.status(500).json({ error: "Failed to check payment status" });
+    next(error);
   }
 };
 

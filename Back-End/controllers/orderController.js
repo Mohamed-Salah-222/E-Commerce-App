@@ -40,8 +40,7 @@ const addOrder = async (req, res) => {
     await cart.save();
     res.status(201).json(savedOrder);
   } catch (error) {
-    console.error("Error creating order:", error);
-    res.status(500).json({ message: "Server error while creating order." });
+    next(error);
   }
 };
 //*-------------------------------------------------------------------------------Get Orders---------------------------------------------------------------------------------
@@ -51,7 +50,7 @@ const getOrders = async (req, res) => {
     const orders = await Order.find({ userId }).sort({ createdAt: -1 }).populate("products.productId");
     res.status(200).json(orders);
   } catch (error) {
-    res.status(500).json({ message: "Server error while fetching order history." });
+    next(error);
   }
 };
 module.exports = {

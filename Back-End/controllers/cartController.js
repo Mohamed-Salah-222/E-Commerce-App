@@ -11,7 +11,7 @@ const getCart = async (req, res) => {
     }
     res.status(200).json(cart);
   } catch (error) {
-    res.status(500).json({ message: "Server error while fetching cart." });
+    next(error);
   }
 };
 //*----------------------------------------------------------------------------Add Item To Cart------------------------------------------------------------------------------
@@ -36,8 +36,7 @@ const AddToCart = async (req, res) => {
     const populatedCart = await updatedCart.populate("items.productId");
     res.status(200).json(populatedCart);
   } catch (error) {
-    console.error("Error adding item to cart:", error);
-    res.status(500).json({ message: "Server error while adding item to cart." });
+    next(error);
   }
 };
 //*-------------------------------------------------------------------------Delete Item From Cart----------------------------------------------------------------------------
@@ -55,8 +54,7 @@ const deleteItemFromCart = async (req, res) => {
     const populatedCart = await updatedCart.populate("items.productId");
     res.status(200).json(populatedCart);
   } catch (error) {
-    console.error("Error removing item from cart:", error);
-    res.status(500).json({ message: "Server error while removing item from cart." });
+    next(error);
   }
 };
 //*-------------------------------------------------------------------------------Promo Code----------------------------------------------------------------------------
@@ -73,8 +71,7 @@ const promoCode = async (req, res) => {
     }
     res.status(200).json(cart);
   } catch (error) {
-    console.error("Error applying promo code:", error);
-    res.status(500).json({ message: "Server error while applying promo code." });
+    next(error);
   }
 };
 module.exports = {

@@ -17,8 +17,7 @@ const deleteProductAdmin = async (req, res) => {
       deletedProduct,
     });
   } catch (error) {
-    console.error("Error deleting product:", error);
-    res.status(500).json({ message: "Server error while deleting product" });
+    next(error);
   }
 };
 //*---------------------------------------------------------------------------Get Orders--------------------------------------------------------------------------------
@@ -35,8 +34,7 @@ const getOrdersAdmin = async (req, res) => {
     const orders = await Order.find().populate("userId", "username email").sort({ createdAt: -1 });
     res.status(200).json(orders);
   } catch (error) {
-    console.log("Server error while loading orders", error);
-    res.status(500).json({ message: "Server error while loading orders", error });
+    next(error);
   }
 };
 //*---------------------------------------------------------------------------Update Order--------------------------------------------------------------------------------
@@ -61,8 +59,7 @@ const updateOrderStatus = async (req, res) => {
     }
     res.status(200).json(updatedOrder);
   } catch (error) {
-    console.error("Error Updating order:", error);
-    res.status(500).json({ message: "Server error while updating order." });
+    next(error);
   }
 };
 //*---------------------------------------------------------------------------Update User--------------------------------------------------------------------------------
@@ -98,14 +95,7 @@ const updateUserStatus = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error updating user to admin:", error);
-    if (error.name === "CastError") {
-      return res.status(400).json({ message: "Invalid user ID format" });
-    }
-    if (error.name === "ValidationError") {
-      return res.status(400).json({ message: "Validation error", details: error.message });
-    }
-    res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 //*---------------------------------------------------------------------------Get Users--------------------------------------------------------------------------------
@@ -126,14 +116,7 @@ const getUsers = async (req, res) => {
       users: users,
     });
   } catch (error) {
-    console.error("Error fetching users:", error);
-    if (error.name === "CastError") {
-      return res.status(400).json({ message: "Invalid user ID format" });
-    }
-    if (error.name === "MongoError" || error.name === "MongoServerError") {
-      return res.status(503).json({ message: "Database connection error" });
-    }
-    res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 //*---------------------------------------------------------------------------Update Product--------------------------------------------------------------------------------
@@ -189,18 +172,7 @@ const updateProduct = async (req, res) => {
       product: updatedProduct,
     });
   } catch (error) {
-    console.error("Error updating product:", error);
-    if (error.name === "CastError") {
-      return res.status(400).json({ message: "Invalid product ID format" });
-    }
-    if (error.name === "ValidationError") {
-      const errors = Object.values(error.errors).map((err) => err.message);
-      return res.status(400).json({
-        message: "Validation error",
-        details: errors,
-      });
-    }
-    res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 module.exports = {

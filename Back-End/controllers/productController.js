@@ -3,12 +3,12 @@ const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 
 //*-------------------------------------------------------------------------------List All Products---------------------------------------------------------------------------------
-const getAllProducts = async (req, res) => {
+const getAllProducts = async (req, res, next) => {
   try {
     const products = await Product.find({}).sort({ createdAt: -1 });
     res.status(200).json(products);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching products." });
+    next(error);
   }
 };
 //*-------------------------------------------------------------------------------Get product by ID---------------------------------------------------------------------------------
@@ -21,7 +21,7 @@ const getProductById = async (req, res) => {
       res.status(404).json({ message: "Product not found." });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error fetching product." });
+    next(error);
   }
 };
 //*-------------------------------------------------------------------------------Create New Product---------------------------------------------------------------------------------
@@ -68,8 +68,7 @@ const addProduct = async (req, res) => {
     const savedProduct = await newProduct.save();
     res.status(201).json({ product: savedProduct });
   } catch (error) {
-    console.error("Error creating product:", error);
-    res.status(500).json({ message: "Server error while creating product." });
+    next(error);
   }
 };
 //*-------------------------------------------------------------------------------Get product by ID---------------------------------------------------------------------------------

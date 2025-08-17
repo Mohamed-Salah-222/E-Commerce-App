@@ -41,6 +41,13 @@ app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api", paymentRoutes);
 
+
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: "Something went wrong on the server!" });
+});
+
 mongoose
   .connect(dbURI)
   .then(() => {

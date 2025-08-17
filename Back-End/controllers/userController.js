@@ -22,8 +22,7 @@ const updateUser = async (req, res) => {
       user: userResponse,
     });
   } catch (error) {
-    console.error("Error updating user profile:", error);
-    res.status(500).json({ message: "Server error while updating profile." });
+    next(error);
   }
 };
 //*------------------------------------------------------------------------------Update User Profile-------------------------------------------------------------------------------
@@ -35,8 +34,7 @@ const getUser = async (req, res) => {
     }
     res.status(200).json(user);
   } catch (error) {
-    console.error("Error fetching user profile:", error);
-    res.status(500).json({ message: "Server error while fetching profile." });
+    next(error);
   }
 };
 //*------------------------------------------------------------------------------Update User Profile-------------------------------------------------------------------------------
@@ -60,8 +58,7 @@ const updateAdress = async (req, res) => {
       address: updatedUser.address,
     });
   } catch (error) {
-    console.error("Error updating user address:", error);
-    res.status(500).json({ message: "Server error while updating address." });
+    next(error);
   }
 };
 
