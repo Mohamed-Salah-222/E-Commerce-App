@@ -4,7 +4,7 @@ const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const { sendVerificationEmail, sendPasswordResetEmail } = require("../services/emailServices");
 //*---------------------------------------------------------------------------------Register---------------------------------------------------------------------------------
-const registerUser = async (req, res) => {
+const registerUser = async (req, res, next) => {
   try {
     const { email, password, username } = req.body;
     if (!email || !password || !username) {
@@ -46,7 +46,7 @@ const registerUser = async (req, res) => {
   }
 };
 //*---------------------------------------------------------------------------------Verify---------------------------------------------------------------------------------
-const verifyUser = async (req, res) => {
+const verifyUser = async (req, res, next) => {
   try {
     const { email, verificationCode } = req.body;
     if (!email || !verificationCode) {
@@ -72,7 +72,7 @@ const verifyUser = async (req, res) => {
   }
 };
 //*---------------------------------------------------------------------------------Login---------------------------------------------------------------------------------
-const loginUser = async (req, res) => {
+const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -94,7 +94,7 @@ const loginUser = async (req, res) => {
   }
 };
 //*---------------------------------------------------------------------------Forgot-Password--------------------------------------------------------------------------------
-const forgotPassword = async (req, res) => {
+const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
     if (!email) {
@@ -115,7 +115,7 @@ const forgotPassword = async (req, res) => {
   }
 };
 //*-------------------------------------------------------------------------------Reset-Password------------------------------------------------------------------------------
-const resetPassword = async (req, res) => {
+const resetPassword = async (req, res, next) => {
   try {
     const { userId, token } = req.params;
     const { password } = req.body;
@@ -137,7 +137,7 @@ const resetPassword = async (req, res) => {
   }
 };
 //*-------------------------------------------------------------------------------Google------------------------------------------------------------------------------
-const googleCallback = (req, res) => {
+const googleCallback = (req, res, next) => {
   const payload = {
     userId: req.user._id,
     email: req.user.email,
@@ -148,7 +148,7 @@ const googleCallback = (req, res) => {
   res.redirect(`https://e-commerce-app-neon-eight.vercel.app/auth/google/callback?token=${token}`);
 };
 //*-------------------------------------------------------------------------------Fresh------------------------------------------------------------------------------
-const getFreshUser = async (req, res) => {
+const getFreshUser = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const user = await User.findById(userId);

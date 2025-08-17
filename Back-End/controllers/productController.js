@@ -12,7 +12,7 @@ const getAllProducts = async (req, res, next) => {
   }
 };
 //*-------------------------------------------------------------------------------Get product by ID---------------------------------------------------------------------------------
-const getProductById = async (req, res) => {
+const getProductById = async (req, res, next) => {
   try {
     const product = await Product.findById(req.params.id);
     if (product) {
@@ -25,7 +25,7 @@ const getProductById = async (req, res) => {
   }
 };
 //*-------------------------------------------------------------------------------Create New Product---------------------------------------------------------------------------------
-const addProduct = async (req, res) => {
+const addProduct = async (req, res, next) => {
   try {
     const { name, description, price, imageUrl, sizes, colors, status } = req.body;
     if (!name || !price) {

@@ -1,6 +1,6 @@
 const Cart = require("../models/cart");
 //*-------------------------------------------------------------------------------Get the cart-------------------------------------------------------------------------------
-const getCart = async (req, res) => {
+const getCart = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     let cart = await Cart.findOne({ userId: userId }).populate("items.productId");
@@ -15,7 +15,7 @@ const getCart = async (req, res) => {
   }
 };
 //*----------------------------------------------------------------------------Add Item To Cart------------------------------------------------------------------------------
-const AddToCart = async (req, res) => {
+const AddToCart = async (req, res, next) => {
   try {
     const { productId, quantity, size, color } = req.body;
     const userId = req.user.userId;
@@ -40,7 +40,7 @@ const AddToCart = async (req, res) => {
   }
 };
 //*-------------------------------------------------------------------------Delete Item From Cart----------------------------------------------------------------------------
-const deleteItemFromCart = async (req, res) => {
+const deleteItemFromCart = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const productIdToRemove = req.params.productId;
@@ -58,7 +58,7 @@ const deleteItemFromCart = async (req, res) => {
   }
 };
 //*-------------------------------------------------------------------------------Promo Code----------------------------------------------------------------------------
-const promoCode = async (req, res) => {
+const promoCode = async (req, res, next) => {
   try {
     const { promoCode } = req.body;
     const userId = req.user.userId;

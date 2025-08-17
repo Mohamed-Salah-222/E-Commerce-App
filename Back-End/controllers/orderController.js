@@ -1,7 +1,7 @@
 const Order = require("../models/order");
 const Cart = require("../models/cart");
 //*-------------------------------------------------------------------------------Add Order---------------------------------------------------------------------------------
-const addOrder = async (req, res) => {
+const addOrder = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const cart = await Cart.findOne({ userId }).populate("items.productId");
@@ -44,7 +44,7 @@ const addOrder = async (req, res) => {
   }
 };
 //*-------------------------------------------------------------------------------Get Orders---------------------------------------------------------------------------------
-const getOrders = async (req, res) => {
+const getOrders = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const orders = await Order.find({ userId }).sort({ createdAt: -1 }).populate("products.productId");

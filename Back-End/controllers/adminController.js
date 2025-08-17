@@ -3,7 +3,7 @@ const Order = require("../models/order");
 const multer = require("multer");
 const Product = require("../models/product");
 //*---------------------------------------------------------------------------Delete Product---------------------------------------------------------------------------------
-const deleteProductAdmin = async (req, res) => {
+const deleteProductAdmin = async (req, res, next) => {
   try {
     const productId = req.params.productId;
     const deletedProduct = await Product.findByIdAndDelete(productId);
@@ -21,7 +21,7 @@ const deleteProductAdmin = async (req, res) => {
   }
 };
 //*---------------------------------------------------------------------------Get Orders--------------------------------------------------------------------------------
-const getOrdersAdmin = async (req, res) => {
+const getOrdersAdmin = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const user = await User.findById(userId);
@@ -38,7 +38,7 @@ const getOrdersAdmin = async (req, res) => {
   }
 };
 //*---------------------------------------------------------------------------Update Order--------------------------------------------------------------------------------
-const updateOrderStatus = async (req, res) => {
+const updateOrderStatus = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const user = await User.findById(userId);
@@ -63,7 +63,7 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 //*---------------------------------------------------------------------------Update User--------------------------------------------------------------------------------
-const updateUserStatus = async (req, res) => {
+const updateUserStatus = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const user = await User.findById(userId);
@@ -99,7 +99,7 @@ const updateUserStatus = async (req, res) => {
   }
 };
 //*---------------------------------------------------------------------------Get Users--------------------------------------------------------------------------------
-const getUsers = async (req, res) => {
+const getUsers = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const user = await User.findById(userId);
@@ -120,7 +120,7 @@ const getUsers = async (req, res) => {
   }
 };
 //*---------------------------------------------------------------------------Update Product--------------------------------------------------------------------------------
-const updateProduct = async (req, res) => {
+const updateProduct = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const user = await User.findById(userId);

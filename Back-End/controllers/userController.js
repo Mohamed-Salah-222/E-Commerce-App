@@ -1,6 +1,6 @@
 const User = require("../models/user");
 //*------------------------------------------------------------------------------Update User Profile-------------------------------------------------------------------------------
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const { username, address } = req.body;
@@ -26,7 +26,7 @@ const updateUser = async (req, res) => {
   }
 };
 //*------------------------------------------------------------------------------Update User Profile-------------------------------------------------------------------------------
-const getUser = async (req, res) => {
+const getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.userId).select("-password");
     if (!user) {
@@ -38,7 +38,7 @@ const getUser = async (req, res) => {
   }
 };
 //*------------------------------------------------------------------------------Update User Profile-------------------------------------------------------------------------------
-const updateAdress = async (req, res) => {
+const updateAdress = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const { street, city, postalCode, country } = req.body;

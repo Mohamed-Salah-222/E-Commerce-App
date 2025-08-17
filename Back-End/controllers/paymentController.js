@@ -3,7 +3,7 @@ const Cart = require("../models/cart");
 const Order = require("../models/order");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 //*------------------------------------------------------------------------------Create Payment-------------------------------------------------------------------------------
-const createPaymentIntent = async (req, res) => {
+const createPaymentIntent = async (req, res, next) => {
   try {
     const { shippingAddress } = req.body;
     const userId = req.user.userId;
@@ -43,7 +43,7 @@ const createPaymentIntent = async (req, res) => {
   }
 };
 //*------------------------------------------------------------------------------Confirm Payment-------------------------------------------------------------------------------
-const confirmPayment = async (req, res) => {
+const confirmPayment = async (req, res, next) => {
   try {
     const { paymentIntentId, shippingAddress } = req.body;
     const userId = req.user.userId;
@@ -103,7 +103,7 @@ const confirmPayment = async (req, res) => {
   }
 };
 
-const paymentStatus = async (req, res) => {
+const paymentStatus = async (req, res, next) => {
   try {
     const { paymentIntentId } = req.params;
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
