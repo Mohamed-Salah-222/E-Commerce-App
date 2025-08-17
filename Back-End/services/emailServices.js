@@ -4,7 +4,7 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: "verifysend93@gmail.com",
-    pass: process.env.GMAIL_APP_PASSWORD, 
+    pass: process.env.GMAIL_APP_PASSWORD,
   },
 });
 
@@ -37,12 +37,12 @@ const sendVerificationEmail = async (userEmail, verificationCode) => {
 
 const sendPasswordResetEmail = async (userEmail, userId, token) => {
   try {
-    const frontendUrl = process.env.NODE_ENV === "production" ? "https://your-live-frontend-url.com" : "http://localhost:5173";
+    const frontendUrl = process.env.NODE_ENV === "production" ? "https://e-commerce-app-neon-eight.vercel.app" : "https://localhost:3001";
 
     const resetLink = `${frontendUrl}/reset-password/${userId}/${token}`;
 
     const mailOptions = {
-      from: '"Habit Tracker App" <verifysend93@gmail.com>',
+      from: '<verifysend93@gmail.com>',
       to: userEmail,
       subject: "Password Reset Request",
       html: `
