@@ -1,11 +1,11 @@
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const User = require("../../models/user");
 const handleValidationErrors = require("../handleValidationErrors");
 //*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Register
 const validateRegistration = [
   body("email", "Please include a valid email")
     .isEmail()
-    .custom(async (email) => {
+    .custom(async (email, { req }) => {
       const user = await User.findOne({ email: email });
       if (user && user.isVerified) {
         return Promise.reject("This email is already registered and verified.");

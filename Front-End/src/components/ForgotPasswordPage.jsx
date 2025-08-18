@@ -21,8 +21,11 @@ function ForgotPasswordPage() {
       });
 
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to send reset link.");
+     if (!response.ok) {
+        if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+          throw new Error(data.errors.map((err) => err.msg).join(", "));
+        }
+        throw new Error(data.message || "failed to send reset link.");
       }
 
       setMessage(data.message);

@@ -23,14 +23,6 @@ const deleteProductAdmin = async (req, res, next) => {
 //*---------------------------------------------------------------------------Get Orders--------------------------------------------------------------------------------
 const getOrdersAdmin = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "user not found" });
-    }
-    if (user.admin === false) {
-      return res.status(403).json({ message: "Forbidden: Admin access required" });
-    }
     const orders = await Order.find().populate("userId", "username email").sort({ createdAt: -1 });
     res.status(200).json(orders);
   } catch (error) {
@@ -40,14 +32,6 @@ const getOrdersAdmin = async (req, res, next) => {
 //*---------------------------------------------------------------------------Update Order--------------------------------------------------------------------------------
 const updateOrderStatus = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "user not found" });
-    }
-    if (user.admin === false) {
-      return res.status(403).json({ message: "Forbidden: Admin access required" });
-    }
     const orderId = req.params.id;
     const { orderStatus } = req.body;
     if (!orderStatus) {
@@ -65,14 +49,6 @@ const updateOrderStatus = async (req, res, next) => {
 //*---------------------------------------------------------------------------Update User--------------------------------------------------------------------------------
 const updateUserStatus = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    if (user.admin === false) {
-      return res.status(403).json({ message: "Forbidden: Admin access required" });
-    }
     const userToUpdateId = req.params.id;
     if (!userToUpdateId) {
       return res.status(400).json({ message: "User ID parameter is required" });
@@ -101,14 +77,6 @@ const updateUserStatus = async (req, res, next) => {
 //*---------------------------------------------------------------------------Get Users--------------------------------------------------------------------------------
 const getUsers = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    if (user.admin === false) {
-      return res.status(403).json({ message: "Forbidden: Admin access required" });
-    }
     const users = await User.find().select("-password").sort({ createdAt: -1 });
     res.status(200).json({
       message: "Users retrieved successfully",
@@ -122,14 +90,6 @@ const getUsers = async (req, res, next) => {
 //*---------------------------------------------------------------------------Update Product--------------------------------------------------------------------------------
 const updateProduct = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    if (user.admin === false) {
-      return res.status(403).json({ message: "Forbidden: Admin access required" });
-    }
     const productId = req.params.id;
     if (!productId) {
       return res.status(400).json({ message: "Product ID is required" });
