@@ -1,22 +1,12 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
-const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const { sendVerificationEmail, sendPasswordResetEmail } = require("../services/emailServices");
 //*---------------------------------------------------------------------------------Register---------------------------------------------------------------------------------
 const registerUser = async (req, res, next) => {
   try {
     const { email, password, username } = req.body;
-    if (!email || !password || !username) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-    if (password.length < 8) {
-      return res.status(400).json({ message: "Password must be at least 8 characters." });
-    }
-    let user = await User.findOne({ email: email });
-    if (user && user.isVerified) {
-      return res.status(409).json({ message: "This email is already registered and verified." });
-    }
+    let user = req.user;
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     const verificationCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
     if (user && !user.isVerified) {
@@ -48,24 +38,12 @@ const registerUser = async (req, res, next) => {
 //*---------------------------------------------------------------------------------Verify---------------------------------------------------------------------------------
 const verifyUser = async (req, res, next) => {
   try {
-    const { email, verificationCode } = req.body;
-    if (!email || !verificationCode) {
-      return res.status(400).json({ message: "Email and verification code are required." });
-    }
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "User not found. Please register first." });
-    }
-    if (user.verificationCode !== verificationCode) {
-      return res.status(400).json({ message: "Invalid verification code." });
-    }
-    if (user.verificationCodeExpires < new Date()) {
-      return res.status(400).json({ message: "Verification code has expired. Please register again to get a new code." });
-    }
+    const user = req.user;
     user.isVerified = true;
     user.verificationCode = undefined;
     user.verificationCodeExpires = undefined;
     await user.save();
+
     res.status(200).json({ message: "Account verified successfully! You can now log in." });
   } catch (error) {
     next(error);
@@ -74,14 +52,8 @@ const verifyUser = async (req, res, next) => {
 //*---------------------------------------------------------------------------------Login---------------------------------------------------------------------------------
 const loginUser = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email or password are missing" });
-    }
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+    const { password } = req.body;
+    const user = req.user;
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
@@ -96,15 +68,7 @@ const loginUser = async (req, res, next) => {
 //*---------------------------------------------------------------------------Forgot-Password--------------------------------------------------------------------------------
 const forgotPassword = async (req, res, next) => {
   try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ message: "Email is required." });
-    }
-    const user = await User.findOne({ email });
-    if (!user) {
-      console.log(`Password reset requested for non-existent user: ${email}`);
-      return res.status(200).json({ message: "If an account with that email exists, a password reset link has been sent." });
-    }
+    let user = req.user;
     const resetSecret = process.env.JWT_SECRET + user.password;
     const payload = { email: user.email, id: user._id };
     const token = jwt.sign(payload, resetSecret, { expiresIn: "15m" });
@@ -117,15 +81,9 @@ const forgotPassword = async (req, res, next) => {
 //*-------------------------------------------------------------------------------Reset-Password------------------------------------------------------------------------------
 const resetPassword = async (req, res, next) => {
   try {
-    const { userId, token } = req.params;
+    const { token } = req.params;
     const { password } = req.body;
-    if (!password || password.length < 8) {
-      return res.status(400).json({ message: "Password must be at least 8 characters long." });
-    }
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
+    const user = req.user;
     const resetSecret = process.env.JWT_SECRET + user.password;
     jwt.verify(token, resetSecret);
     const hashedPassword = await bcrypt.hash(password, 10);

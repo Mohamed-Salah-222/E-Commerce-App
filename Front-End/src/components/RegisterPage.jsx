@@ -22,11 +22,18 @@ function RegisterPage() {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to register");
+
+      if (!response.ok) {
+        throw data;
+      }
 
       navigate(`/verify-email?email=${email}`);
     } catch (err) {
-      setError(err.message);
+      if (err.errors && err.errors.length > 0) {
+        setError(err.errors[0].msg);
+      } else {
+        setError(err.message || "An unknown error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -34,23 +41,19 @@ function RegisterPage() {
 
   return (
     <div className="flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-50 -m-4 md:-m-8 relative overflow-hidden" style={{ minHeight: "calc(100vh - 120px)" }}>
-
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-blue-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
 
- 
         <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-br from-pink-300/10 to-orange-300/10 rounded-full blur-2xl animate-bounce" style={{ animationDuration: "3s" }}></div>
         <div className="absolute top-3/4 right-1/4 w-20 h-20 bg-gradient-to-br from-green-300/15 to-blue-300/15 rounded-full blur-xl animate-ping" style={{ animationDuration: "4s" }}></div>
 
-   
         <div className="absolute top-1/3 left-1/2 w-2 h-2 bg-blue-400/40 rounded-full animate-ping" style={{ animationDelay: "0s" }}></div>
         <div className="absolute top-2/3 left-1/3 w-1.5 h-1.5 bg-purple-400/30 rounded-full animate-ping" style={{ animationDelay: "1s" }}></div>
         <div className="absolute top-1/2 right-1/3 w-2.5 h-2.5 bg-cyan-400/35 rounded-full animate-ping" style={{ animationDelay: "2s" }}></div>
       </div>
 
       <div className="w-full max-w-md bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-8 space-y-6 relative z-10 hover:shadow-3xl hover:bg-white/90 transition-all duration-500 hover:scale-[1.02] group animate-in fade-in slide-in-from-bottom duration-700">
-   
         <div className="text-center space-y-2">
           <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 hover:rotate-3 group-hover:animate-pulse">
             <svg className="w-8 h-8 text-white transition-transform duration-300 hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +65,6 @@ function RegisterPage() {
         </div>
 
         <div className="space-y-5">
-
           <div className="group/field animate-in slide-in-from-left duration-500" style={{ animationDelay: "100ms" }}>
             <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2 transition-all duration-200 group-focus-within/field:text-blue-600 group-focus-within/field:translate-x-1">
               <span className="flex items-center">
@@ -81,7 +83,6 @@ function RegisterPage() {
               />
               <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 transform scale-x-0 group-focus-within/field:scale-x-100 transition-transform duration-500 ease-out"></div>
 
-      
               {username && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500 animate-in fade-in zoom-in duration-300">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -91,7 +92,6 @@ function RegisterPage() {
               )}
             </div>
           </div>
-
 
           <div className="group/field animate-in slide-in-from-left duration-500" style={{ animationDelay: "200ms" }}>
             <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2 transition-all duration-200 group-focus-within/field:text-blue-600 group-focus-within/field:translate-x-1">
@@ -110,7 +110,6 @@ function RegisterPage() {
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm hover:bg-white/80 group-hover/field:border-gray-300 hover:scale-[1.01] focus:scale-[1.01] hover:shadow-sm"
               />
               <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 transform scale-x-0 group-focus-within/field:scale-x-100 transition-transform duration-500 ease-out"></div>
-
 
               {email && email.includes("@") && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500 animate-in fade-in zoom-in duration-300">
@@ -143,7 +142,6 @@ function RegisterPage() {
               />
               <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 transform scale-x-0 group-focus-within/field:scale-x-100 transition-transform duration-500 ease-out"></div>
 
-
               {password && password.length >= 8 && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500 animate-in fade-in zoom-in duration-300">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -165,14 +163,12 @@ function RegisterPage() {
             </div>
           )}
 
-  
           <button
             onClick={handleSubmit}
             disabled={loading}
             className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl relative overflow-hidden group/btn animate-in slide-in-from-bottom duration-500"
             style={{ animationDelay: "400ms" }}
           >
- 
             <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"></div>
 
             <span className="flex items-center justify-center relative z-10">
@@ -195,7 +191,6 @@ function RegisterPage() {
             </span>
           </button>
         </div>
-
 
         <div className="text-center animate-in fade-in duration-500" style={{ animationDelay: "500ms" }}>
           <p className="text-sm text-gray-600">
