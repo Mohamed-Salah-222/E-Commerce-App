@@ -8,8 +8,8 @@ import LoginPage from "./components/LoginPage";
 import CartPage from "./components/CartPage";
 import OrderHistoryPage from "./components/OrderHistoryPage";
 import AdminOrdersPage from "./components/AdminOrdersPage";
-import AdminUsersPage from "./components/AdminUsersPage"; 
-import AdminProductsPage from "./components/AdminProductsPage"; 
+import AdminUsersPage from "./components/AdminUsersPage";
+import AdminProductsPage from "./components/AdminProductsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import VerifyPage from "./components/VerifyPage";
 import Notification from "./components/Notification";
@@ -29,7 +29,7 @@ function App() {
     navigate("/login");
   };
 
-  const isAdmin = user?.admin === true; 
+  const isAdmin = user?.admin === true;
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
