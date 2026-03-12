@@ -2,7 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-.product-link {
-  text-decoration: none;
-  color: inherit;
+@layer utilities {
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
 }

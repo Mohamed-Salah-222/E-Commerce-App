@@ -1,7 +1,33 @@
-import { createContext, useState, useEffect, useContext } from "react";
+import { createContext, useState, useEffect, useContext, useCallback } from "react";
 import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+function isTokenExpired(token) {
+  try {
+    const { exp } = jwtDecode(token);
+    if (!exp) return false;
+    // buffer
+    return Date.now() >= exp * 1000 - 10000;
+  } catch {
+    return true;
+  }
+}
+
+async function fetchUserFromAPI(authToken) {
+  const response = await fetch(`${API_URL}/api/auth/me`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) throw new Error(`API returned ${response.status}`);
+  return response.json();
+}
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
@@ -12,38 +38,25 @@ export function AuthProvider({ children }) {
     const initializeAuth = async () => {
       try {
         const storedToken = localStorage.getItem("token");
-        if (storedToken) {
-          const decodedUser = jwtDecode(storedToken);
-          setToken(storedToken);
-          console.log("Decoded user from JWT:", decodedUser); // Debug log
 
-          // Try to fetch fresh user data, fallback to decoded token if it fails
-          try {
-            console.log("Fetching fresh user data on init..."); // Debug log
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${storedToken}`,
-                "Content-Type": "application/json",
-              },
-            });
-
-            if (response.ok) {
-              const userData = await response.json();
-              console.log("Fresh user data from API:", userData); // Debug log
-              setUser(userData);
-            } else {
-              console.log("API call failed, using decoded JWT data"); // Debug log
-              setUser(decodedUser);
-            }
-          } catch (error) {
-            console.error("Failed to fetch user data on init:", error);
-            console.log("Error occurred, using decoded JWT data"); // Debug log
-            setUser(decodedUser);
-          }
+        if (!storedToken || isTokenExpired(storedToken)) {
+          if (storedToken) localStorage.removeItem("token");
+          return;
         }
-      } catch (error) {
-        console.error("Invalid token found in storage", error);
+
+        const decodedUser = jwtDecode(storedToken);
+        setToken(storedToken);
+     
+        setUser(decodedUser);
+
+
+        try {
+          const freshUser = await fetchUserFromAPI(storedToken);
+          setUser(freshUser);
+        } catch {
+          // Decoded JWT data is already set, so the app works either way
+        }
+      } catch {
         localStorage.removeItem("token");
       } finally {
         setLoading(false);
@@ -55,69 +68,37 @@ export function AuthProvider({ children }) {
 
   const login = async (newToken) => {
     localStorage.setItem("token", newToken);
-    const decodedUser = jwtDecode(newToken);
     setToken(newToken);
 
-    // Try to fetch fresh user data, fallback to decoded token if it fails
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${newToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+    const decodedUser = jwtDecode(newToken);
+    setUser(decodedUser);
 
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-      } else {
-        setUser(decodedUser);
-      }
-    } catch (error) {
-      console.error("Failed to fetch user data on login:", error);
-      setUser(decodedUser);
+    try {
+      const freshUser = await fetchUserFromAPI(newToken);
+      setUser(freshUser);
+    } catch {
+      // Decoded JWT data is already set as fallback
     }
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem("token");
     setToken(null);
     setUser(null);
-  };
+  }, []);
 
-  const refetchUser = async () => {
-    if (!token) {
-      console.log("No token available for refetch");
-      return;
-    }
+  const refetchUser = useCallback(async () => {
+    if (!token) return;
 
     try {
-      console.log("Refetching user data..."); // Debug log
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch user data");
-      }
-
-      const userData = await response.json();
-      console.log("New user data:", userData); // Debug log
-      setUser(userData);
-      console.log("User state updated"); // Debug log
+      const freshUser = await fetchUserFromAPI(token);
+      setUser(freshUser);
     } catch (error) {
-      console.error("Failed to refetch user:", error);
-      // Optionally handle token expiration
-      if (error.message === "Unauthorized") {
+      if (error.message.includes("401")) {
         logout();
       }
     }
-  };
+  }, [token, logout]);
 
   const value = {
     token,
@@ -128,7 +109,8 @@ export function AuthProvider({ children }) {
     refetchUser,
   };
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

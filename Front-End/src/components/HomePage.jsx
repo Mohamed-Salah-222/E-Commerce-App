@@ -1,9 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import ProductList from "./ProductList";
+import LoadingSkeleton from "./LoadingSkeleton";
+
+// In a real app, these would come from the backend or a CMS
+const TESTIMONIALS = [
+  {
+    name: "Sarah A.",
+    message: "Amazing products and super fast delivery!",
+    rating: 5,
+  },
+  {
+    name: "Mohamed E.",
+    message: "Customer service was very helpful. Will buy again!",
+    rating: 5,
+  },
+  {
+    name: "Lina K.",
+    message: "Great quality and prices. Highly recommend.",
+    rating: 4,
+  },
+];
 
 function HomePage() {
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("newest");
 
@@ -11,11 +32,11 @@ function HomePage() {
     const fetchProducts = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
-        if (!response.ok) throw new Error("Network response was not ok");
+        if (!response.ok) throw new Error("Failed to load products");
         const data = await response.json();
         setAllProducts(data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
+      } catch (err) {
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -23,442 +44,145 @@ function HomePage() {
     fetchProducts();
   }, []);
 
-  let displayedProducts = [...allProducts];
+  const displayedProducts = useMemo(() => {
+    let filtered = allProducts;
 
-  if (searchTerm) {
-    displayedProducts = displayedProducts.filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  }
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter((p) => p.name.toLowerCase().includes(term));
+    }
 
-  if (sortOption === "price_asc") {
-    displayedProducts = [...displayedProducts].sort((a, b) => a.price - b.price);
-  } else if (sortOption === "price_desc") {
-    displayedProducts = [...displayedProducts].sort((a, b) => b.price - a.price);
-  }
+    if (sortOption === "price_asc") {
+      return [...filtered].sort((a, b) => a.price - b.price);
+    }
+    if (sortOption === "price_desc") {
+      return [...filtered].sort((a, b) => b.price - a.price);
+    }
 
-  const reviews = [
-    {
-      name: "Sarah A.",
-      message: "Amazing products and super fast delivery! 💖💖",
-    },
-    {
-      name: "Mohamed E.",
-      message: "Customer service was very helpful. Will buy again!",
-    },
-    {
-      name: "Lina K.",
-      message: "Great quality and prices. Highly recommend.",
-    },
-  ];
-
-  if (loading) {
-    return <div className="text-center p-10">Loading products...</div>;
-  }
+    return filtered;
+  }, [allProducts, searchTerm, sortOption]);
 
   return (
-    <div className="space-y-32 overflow-hidden pt-4">
-      <div className="relative text-center py-24 px-4 bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-3xl shadow-xl overflow-hidden animate-fade-in-up">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-indigo-200/30 to-purple-200/30 rounded-full transform -translate-x-48 -translate-y-48 animate-float"></div>
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-tl from-purple-200/30 to-pink-200/30 rounded-full transform translate-x-40 translate-y-40 animate-float-delayed"></div>
+    <div className="space-y-20">
+      {/* ── Hero ── */}
+      <section className="relative rounded-3xl overflow-hidden bg-gray-900 text-white px-6 py-20 md:py-28">
+        {/* Subtle grain overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          }}
+        />
 
-        <div className="relative z-0">
-          <h1 className="text-4xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 animate-gradient-x leading-tight">Find Your Perfect Style</h1>
-          <div className="mt-2 flex justify-center">
-            <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-expand-width"></div>
-          </div>
+        {/* Accent gradient blob */}
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-purple-500/15 rounded-full blur-3xl" />
 
-          <p className="mt-8 max-w-2xl mx-auto text-xl text-gray-600 leading-relaxed animate-fade-in-delayed">Browse our curated collection of high-quality apparel and accessories.</p>
+        <div className="relative max-w-3xl mx-auto text-center">
+          <p className="text-indigo-400 text-sm font-semibold tracking-widest uppercase mb-4">Curated Collection</p>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1]">
+            Find Your
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">Perfect Style</span>
+          </h1>
+          <p className="mt-6 text-lg text-gray-400 max-w-xl mx-auto leading-relaxed">Browse our handpicked selection of high-quality apparel and accessories delivered to your door.</p>
 
-          <div className="mt-12 relative animate-slide-up-delayed">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-full blur-xl opacity-0 animate-search-glow"></div>
-            <input
-              type="text"
-              placeholder="Search all products..."
-              className="relative w-full max-w-2xl p-6 text-lg border-2 border-gray-200 rounded-full shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-400/50 focus:border-indigo-400 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:shadow-xl transform hover:scale-[1.02]"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="animate-slide-in-up">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-6">
-          <div className="relative">
-            <h2 className="text-4xl font-bold text-transparent bg-gradient-to-r from-gray-800 to-indigo-600 bg-clip-text">Our Collection</h2>
-            <div className="absolute -bottom-2 left-0 w-16 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-expand-width-delayed"></div>
-          </div>
-
-          <div className="flex items-center gap-6 animate-fade-in-right">
-            <label htmlFor="sort" className="text-sm font-bold text-gray-700 uppercase tracking-wider">
-              Sort by:
-            </label>
-            <div className="relative">
-              <select id="sort" className="appearance-none p-4 pr-10 border-2 border-gray-200 rounded-xl shadow-lg bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-300 hover:shadow-xl cursor-pointer font-medium" value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
-                <option value="newest">Newest</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-              </select>
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+          {/* Search */}
+          <div className="mt-10 max-w-xl mx-auto relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
             </div>
+            <input type="text" placeholder="Search products..." className="w-full pl-12 pr-5 py-4 bg-white/10 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:bg-white/[0.12] transition-all" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </div>
+      </section>
 
-        <div className="animate-products-grid">
+      {/* ── Products Section ── */}
+      <section>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Our Collection</h2>
+            <p className="text-sm text-gray-500 mt-1">{loading ? "Loading..." : `${displayedProducts.length} product${displayedProducts.length !== 1 ? "s" : ""}`}</p>
+          </div>
+
+          <select value={sortOption} onChange={(e) => setSortOption(e.target.value)} className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-900/10 cursor-pointer">
+            <option value="newest">Newest</option>
+            <option value="price_asc">Price: Low → High</option>
+            <option value="price_desc">Price: High → Low</option>
+          </select>
+        </div>
+
+        {loading ? (
+          <LoadingSkeleton variant="product-grid" />
+        ) : error ? (
+          <div className="text-center py-16">
+            <p className="text-red-500 font-medium">{error}</p>
+            <button onClick={() => window.location.reload()} className="mt-4 px-5 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+              Try again
+            </button>
+          </div>
+        ) : displayedProducts.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-5xl mb-4">🔍</p>
+            <p className="text-gray-900 font-semibold text-lg">No products found</p>
+            <p className="text-gray-500 mt-1">{searchTerm ? `Nothing matches "${searchTerm}"` : "Check back later for new arrivals."}</p>
+            {searchTerm && (
+              <button onClick={() => setSearchTerm("")} className="mt-4 px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors">
+                Clear search
+              </button>
+            )}
+          </div>
+        ) : (
           <ProductList products={displayedProducts} />
-        </div>
-      </div>
+        )}
+      </section>
 
-      <div className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 py-16 px-8 text-center rounded-3xl shadow-2xl overflow-hidden animate-bounce-in transform hover:scale-[1.02] transition-all duration-500">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/10 via-transparent to-white/10 animate-shimmer-infinite"></div>
-        <div className="absolute top-4 left-4 w-8 h-8 bg-white/20 rounded-full animate-float"></div>
-        <div className="absolute bottom-4 right-4 w-6 h-6 bg-white/20 rounded-full animate-float-delayed"></div>
-        <div className="absolute top-1/2 left-8 w-4 h-4 bg-white/30 rounded-full animate-pulse"></div>
-        <div className="absolute top-8 right-8 w-3 h-3 bg-white/30 rounded-full animate-pulse" style={{ animationDelay: "1s" }}></div>
+      {/* ── Promo Banner ── */}
+      <section className="relative bg-gray-900 rounded-3xl px-6 py-14 text-center overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-pink-600/20" />
+        <div className="absolute -top-20 -right-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl" />
 
-        <div className="relative z-10">
-          <div className="animate-bounce-emoji">
-            <span className="text-6xl animate-spin-slow">🎉</span>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 animate-glow-text">Get 10% Off!</h2>
-          <p className="text-indigo-100 text-xl leading-relaxed max-w-2xl mx-auto">
-            Use promo code <span className="inline-block font-bold text-white bg-white/20 px-4 py-2 rounded-xl backdrop-blur-sm transform hover:scale-110 transition-transform duration-200 animate-pulse-code">CROW10</span> at checkout for a special discount!
+        <div className="relative">
+          <p className="text-indigo-400 text-sm font-semibold tracking-widest uppercase mb-3">Limited Offer</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-white">Get 10% Off Your Order</h2>
+          <p className="mt-4 text-gray-400 text-lg">
+            Use code <code className="inline-block bg-white/10 text-indigo-300 px-3 py-1 rounded-lg font-mono font-bold">CROW10</code> at checkout
           </p>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 animate-fade-in-up-delayed">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-transparent bg-gradient-to-r from-gray-800 to-indigo-600 bg-clip-text">What Our Customers Say</h2>
-          <div className="flex justify-center">
-            <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-expand-width-delayed"></div>
-          </div>
-          <p className="mt-6 text-gray-600 text-lg max-w-2xl mx-auto">Don't just take our word for it - hear from our satisfied customers</p>
+      {/* ── Testimonials ── */}
+      <section>
+        <div className="text-center mb-12">
+          <h2 className="text-2xl font-bold text-gray-900">What Our Customers Say</h2>
+          <p className="text-gray-500 mt-2">Real feedback from real customers</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {reviews.map((review, index) => (
-            <div key={index} className="group relative bg-white p-8 rounded-2xl shadow-xl border-t-4 border-indigo-500 transform hover:scale-105 hover:-translate-y-2 transition-all duration-500 hover:shadow-2xl animate-review-card overflow-hidden" style={{ animationDelay: `${index * 0.2}s` }}>
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-indigo-50 to-purple-50 rounded-full transform translate-x-10 -translate-y-10 group-hover:scale-150 transition-transform duration-500"></div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {TESTIMONIALS.map((review, index) => (
+            <div key={index} className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              {/* Stars */}
+              <div className="flex gap-0.5 mb-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <svg key={i} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill={i < review.rating ? "#f59e0b" : "#e5e7eb"} stroke="none">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                ))}
+              </div>
 
-              <div className="absolute top-4 left-4 text-indigo-200 text-4xl font-serif transform group-hover:scale-110 transition-transform duration-300">"</div>
+              <p className="text-gray-700 leading-relaxed mb-5 italic">"{review.message}"</p>
 
-              <div className="relative z-10">
-                <p className="text-gray-700 mb-6 italic text-lg leading-relaxed pt-6">{review.message}</p>
-
-                <div className="flex items-center justify-end space-x-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full"></div>
-                  <p className="text-lg font-bold text-gray-900">{review.name}</p>
-                </div>
-
-                <div className="flex justify-end mt-2 space-x-1">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-star-twinkle" style={{ animationDelay: `${i * 0.1}s` }}></div>
-                  ))}
-                </div>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-gray-900 flex items-center justify-center text-white text-sm font-bold">{review.name.charAt(0)}</div>
+                <span className="text-sm font-semibold text-gray-900">{review.name}</span>
               </div>
             </div>
           ))}
         </div>
-      </div>
-
-      <style jsx>{`
-        @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes fade-in-delayed {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes slide-up-delayed {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes slide-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(40px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes fade-in-right {
-          from {
-            opacity: 0;
-            transform: translateX(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes fade-in-up-delayed {
-          from {
-            opacity: 0;
-            transform: translateY(60px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes expand-width {
-          from {
-            width: 0;
-          }
-          to {
-            width: 6rem;
-          }
-        }
-
-        @keyframes expand-width-delayed {
-          from {
-            width: 0;
-          }
-          to {
-            width: 4rem;
-          }
-        }
-
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-20px) rotate(180deg);
-          }
-        }
-
-        @keyframes float-delayed {
-          0%,
-          100% {
-            transform: translateY(0px) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-15px) rotate(-180deg);
-          }
-        }
-
-        @keyframes bounce-in {
-          from {
-            opacity: 0;
-            transform: scale(0.3) translateY(50px);
-          }
-          50% {
-            transform: scale(1.05) translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-          }
-        }
-
-        @keyframes bounce-emoji {
-          0%,
-          100% {
-            transform: scale(1) rotate(0deg);
-          }
-          50% {
-            transform: scale(1.2) rotate(10deg);
-          }
-        }
-
-        @keyframes shimmer-infinite {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-
-        @keyframes glow-text {
-          0%,
-          100% {
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-          }
-          50% {
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6);
-          }
-        }
-
-        @keyframes pulse-code {
-          0%,
-          100% {
-            background-color: rgba(255, 255, 255, 0.2);
-          }
-          50% {
-            background-color: rgba(255, 255, 255, 0.3);
-          }
-        }
-
-        @keyframes review-card {
-          from {
-            opacity: 0;
-            transform: translateY(50px) scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-
-        @keyframes star-twinkle {
-          0%,
-          100% {
-            opacity: 0.7;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.2);
-          }
-        }
-
-        @keyframes gradient-x {
-          0%,
-          100% {
-            background-size: 200% 200%;
-            background-position: left center;
-          }
-          50% {
-            background-size: 200% 200%;
-            background-position: right center;
-          }
-        }
-
-        @keyframes search-glow {
-          0%,
-          100% {
-            opacity: 0;
-          }
-          50% {
-            opacity: 1;
-          }
-        }
-
-        @keyframes spin-slow {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        .animate-fade-in-up {
-          animation: fade-in-up 1s ease-out;
-        }
-
-        .animate-fade-in-delayed {
-          animation: fade-in-delayed 1s ease-out 0.5s both;
-        }
-
-        .animate-slide-up-delayed {
-          animation: slide-up-delayed 1s ease-out 0.8s both;
-        }
-
-        .animate-slide-in-up {
-          animation: slide-in-up 1s ease-out 0.3s both;
-        }
-
-        .animate-fade-in-right {
-          animation: fade-in-right 1s ease-out 0.5s both;
-        }
-
-        .animate-fade-in-up-delayed {
-          animation: fade-in-up-delayed 1s ease-out 1s both;
-        }
-
-        .animate-expand-width {
-          animation: expand-width 1s ease-out 0.3s both;
-        }
-
-        .animate-expand-width-delayed {
-          animation: expand-width-delayed 1s ease-out 0.5s both;
-        }
-
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-
-        .animate-float-delayed {
-          animation: float-delayed 8s ease-in-out infinite 2s;
-        }
-
-        .animate-bounce-in {
-          animation: bounce-in 1.2s ease-out 0.2s both;
-        }
-
-        .animate-bounce-emoji {
-          animation: bounce-emoji 2s ease-in-out infinite;
-        }
-
-        .animate-shimmer-infinite {
-          animation: shimmer-infinite 3s ease-in-out infinite;
-        }
-
-        .animate-glow-text {
-          animation: glow-text 2s ease-in-out infinite;
-        }
-
-        .animate-pulse-code {
-          animation: pulse-code 2s ease-in-out infinite;
-        }
-
-        .animate-review-card {
-          animation: review-card 0.8s ease-out both;
-        }
-
-        .animate-star-twinkle {
-          animation: star-twinkle 2s ease-in-out infinite;
-        }
-
-        .animate-gradient-x {
-          animation: gradient-x 3s ease infinite;
-        }
-
-        .animate-search-glow {
-          animation: search-glow 3s ease-in-out infinite 1s;
-        }
-
-        .animate-spin-slow {
-          animation: spin-slow 3s linear infinite;
-        }
-
-        .animate-products-grid {
-          animation: fade-in-up 1s ease-out 0.6s both;
-        }
-      `}</style>
+      </section>
     </div>
   );
 }
