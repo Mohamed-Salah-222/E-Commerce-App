@@ -1,8 +1,8 @@
 import { useState } from "react";
-import AuthLayout from "./AuthLayout";
-import FormInput from "./FormInput";
-import FormAlert from "./FormAlert";
-import SubmitButton from "./SubmitButton";
+import AuthLayout from "../layout/AuthLayout";
+import FormInput from "../ui/FormInput";
+import FormAlert from "../ui/FormAlert";
+import SubmitButton from "../ui/SubmitButton";
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState("");

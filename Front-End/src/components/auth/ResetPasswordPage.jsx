@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import AuthLayout from "./AuthLayout";
-import FormInput from "./FormInput";
-import FormAlert from "./FormAlert";
-import SubmitButton from "./SubmitButton";
+import AuthLayout from "../layout/AuthLayout";
+import FormInput from "../ui/FormInput";
+import FormAlert from "../ui/FormAlert";
+import SubmitButton from "../ui/SubmitButton";
 
 function ResetPasswordPage() {
   const { userId, token } = useParams();

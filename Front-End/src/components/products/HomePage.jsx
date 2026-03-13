@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import ProductList from "./ProductList";
-import Skeleton from "./Skeleton";
+import Skeleton from "../layout/Skeleton";
 
 // In a real app, these would come from the backend or a CMS
 const TESTIMONIALS = [

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import { useNotification } from "../context/NotificationContext";
-import PaymentPopup from "./PaymentPopup";
-import Skeleton from "./Skeleton";
+import { useNotification } from "../../context/NotificationContext";
+import PaymentPopup from "../cart/PaymentPopup";
+import Skeleton from "../layout/Skeleton";
 
 function CartPage() {
   const [cart, setCart] = useState(null);

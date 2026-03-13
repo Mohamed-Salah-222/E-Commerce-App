@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import AuthLayout from "./AuthLayout";
-import FormInput from "./FormInput";
-import FormAlert from "./FormAlert";
-import SubmitButton from "./SubmitButton";
+import { useAuth } from "../../context/AuthContext";
+import AuthLayout from "../layout/AuthLayout";
+import FormInput from "../ui/FormInput";
+import FormAlert from "../ui/FormAlert";
+import SubmitButton from "../ui/SubmitButton";
 
 function LoginPage() {
   const [email, setEmail] = useState("");

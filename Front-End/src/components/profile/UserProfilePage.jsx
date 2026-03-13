@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import { useNotification } from "../context/NotificationContext";
-import Skeleton from "./Skeleton";
+import { useAuth } from "../../context/AuthContext";
+import { useNotification } from "../../context/NotificationContext";
+import Skeleton from "../layout/Skeleton";
 
 function UserProfilePage() {
   const { token, refetchUser } = useAuth();

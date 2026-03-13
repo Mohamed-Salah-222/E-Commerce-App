@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { useNotification } from "../context/NotificationContext";
-import Skeleton from "./Skeleton";
+import { useAuth } from "../../context/AuthContext";
+import { useNotification } from "../../context/NotificationContext";
+import Skeleton from "../layout/Skeleton";
 
 function ProductDetailPage() {
   const { id } = useParams();

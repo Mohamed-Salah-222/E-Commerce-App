@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { useAuth } from "../context/AuthContext";
-import Skeleton from "./Skeleton";
+import { useAuth } from "../../context/AuthContext";
+import Skeleton from "../layout/Skeleton";
 
 const STATUS_OPTIONS = [
   { value: "processing", label: "Processing", style: "bg-amber-50 text-amber-700 border-amber-200" },

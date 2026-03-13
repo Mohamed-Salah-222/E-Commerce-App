@@ -1,27 +1,27 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 
-import Navbar from "./components/Navbar";
-import Notification from "./components/Notification";
-import ProtectedRoute from "./components/ProtectedRoute";
-import PageLoader from "./components/PageLoader";
+import Navbar from "./components/layout/Navbar";
+import Notification from "./components/ui/Notification";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import PageLoader from "./components/layout/PageLoader";
 
-// Lazy-loaded pages — only downloaded when the user navigates to them
-const HomePage = lazy(() => import("./components/HomePage"));
-const ProductDetailPage = lazy(() => import("./components/ProductDetailPage"));
-const RegisterPage = lazy(() => import("./components/RegisterPage"));
-const LoginPage = lazy(() => import("./components/LoginPage"));
-const VerifyPage = lazy(() => import("./components/VerifyPage"));
-const ForgotPasswordPage = lazy(() => import("./components/ForgotPasswordPage"));
-const ResetPasswordPage = lazy(() => import("./components/ResetPasswordPage"));
-const GoogleAuthCallbackPage = lazy(() => import("./components/GoogleAuthCallbackPage"));
-const CartPage = lazy(() => import("./components/CartPage"));
-const OrderHistoryPage = lazy(() => import("./components/OrderHistoryPage"));
-const CheckoutPage = lazy(() => import("./components/CheckoutPage"));
-const UserProfilePage = lazy(() => import("./components/UserProfilePage"));
-const AdminOrdersPage = lazy(() => import("./components/AdminOrdersPage"));
-const AdminProductsPage = lazy(() => import("./components/AdminProductsPage"));
-const AdminUsersPage = lazy(() => import("./components/AdminUsersPage"));
+// Lazy-loaded pages
+const HomePage = lazy(() => import("./components/products/HomePage"));
+const ProductDetailPage = lazy(() => import("./components/products/ProductDetailPage"));
+const RegisterPage = lazy(() => import("./components/auth/RegisterPage"));
+const LoginPage = lazy(() => import("./components/auth/LoginPage"));
+const VerifyPage = lazy(() => import("./components/auth/VerifyPage"));
+const ForgotPasswordPage = lazy(() => import("./components/auth/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./components/auth/ResetPasswordPage"));
+const GoogleAuthCallbackPage = lazy(() => import("./components/auth/GoogleAuthCallbackPage"));
+const CartPage = lazy(() => import("./components/cart/CartPage"));
+const OrderHistoryPage = lazy(() => import("./components/orders/OrderHistoryPage"));
+const CheckoutPage = lazy(() => import("./components/cart/CheckoutPage"));
+const UserProfilePage = lazy(() => import("./components/profile/UserProfilePage"));
+const AdminOrdersPage = lazy(() => import("./components/admin/AdminOrdersPage"));
+const AdminProductsPage = lazy(() => import("./components/admin/AdminProductsPage"));
+const AdminUsersPage = lazy(() => import("./components/admin/AdminUsersPage"));
 const NotFoundPage = lazy(() => import("./components/NotFoundPage"));
 
 function App() {

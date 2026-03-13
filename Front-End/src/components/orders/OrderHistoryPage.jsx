@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
-import Skeleton from "./Skeleton";
+import Skeleton from "../layout/Skeleton";
 
 const STATUS_STYLES = {
   delivered: "bg-green-50 text-green-700 border-green-200",
