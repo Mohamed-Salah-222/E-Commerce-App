@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import ProductList from "./ProductList";
-import LoadingSkeleton from "./LoadingSkeleton";
+import Skeleton from "./Skeleton";
 
 // In a real app, these would come from the backend or a CMS
 const TESTIMONIALS = [
@@ -116,7 +116,19 @@ function HomePage() {
         </div>
 
         {loading ? (
-          <LoadingSkeleton variant="product-grid" />
+          /* Skeleton that mirrors the actual product grid layout */
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                <Skeleton className="h-52 w-full rounded-none" />
+                <div className="p-4 space-y-3">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-8 w-24 rounded-xl" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : error ? (
           <div className="text-center py-16">
             <p className="text-red-500 font-medium">{error}</p>

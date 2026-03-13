@@ -1,7 +1,36 @@
-import React, { useState, useEffect } from "react";
-import { Search, Filter, Eye, Package, Truck, CheckCircle, Clock, AlertCircle, X } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { useAuth } from "../context/AuthContext";
+import Skeleton from "./Skeleton";
 
-const AdminOrdersPage = () => {
+const STATUS_OPTIONS = [
+  { value: "processing", label: "Processing", style: "bg-amber-50 text-amber-700 border-amber-200" },
+  { value: "shipped", label: "Shipped", style: "bg-blue-50 text-blue-700 border-blue-200" },
+  { value: "delivered", label: "Delivered", style: "bg-green-50 text-green-700 border-green-200" },
+  { value: "cancelled", label: "Cancelled", style: "bg-red-50 text-red-700 border-red-200" },
+];
+
+const getStatusStyle = (status) => STATUS_OPTIONS.find((o) => o.value === status)?.style || STATUS_OPTIONS[0].style;
+
+const getStatusLabel = (status) => STATUS_OPTIONS.find((o) => o.value === status)?.label || status;
+
+const formatDate = (d) =>
+  new Date(d).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+const formatCurrency = (amount) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
+
+const getUserData = (order) => {
+  const user = order.userId || order.user;
+  return { username: user?.username || "N/A", email: user?.email || "N/A" };
+};
+
+function AdminOrdersPage() {
+  const { token } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,48 +39,29 @@ const AdminOrdersPage = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [updatingOrderId, setUpdatingOrderId] = useState(null);
 
-  const statusOptions = [
-    { value: "processing", label: "Processing", color: "bg-yellow-100 text-yellow-800", icon: Clock },
-    { value: "shipped", label: "Shipped", color: "bg-blue-100 text-blue-800", icon: Truck },
-    { value: "delivered", label: "Delivered", color: "bg-green-100 text-green-800", icon: CheckCircle },
-    { value: "cancelled", label: "Cancelled", color: "bg-red-100 text-red-800", icon: X },
-  ];
-
-  const getStatusInfo = (status) => {
-    return statusOptions.find((option) => option.value === status) || statusOptions[0];
-  };
-
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token"); 
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/orders`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch orders");
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/orders`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) throw new Error("Failed to fetch orders");
+        setOrders(await response.json());
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-
-      const data = await response.json();
-      setOrders(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+    };
+    fetchOrders();
+  }, [token]);
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       setUpdatingOrderId(orderId);
-      const token = localStorage.getItem("token");
-
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/orders/${orderId}`, {
         method: "PATCH",
         headers: {
@@ -60,17 +70,12 @@ const AdminOrdersPage = () => {
         },
         body: JSON.stringify({ orderStatus: newStatus }),
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to update order status");
-      }
+      if (!response.ok) throw new Error("Failed to update order status");
 
       const updatedOrder = await response.json();
-
-      setOrders(orders.map((order) => (order._id === orderId ? { ...order, ...updatedOrder, userId: order.userId, user: order.user } : order)));
-
-      if (selectedOrder && selectedOrder._id === orderId) {
-        setSelectedOrder({ ...selectedOrder, ...updatedOrder, userId: selectedOrder.userId, user: selectedOrder.user });
+      setOrders((prev) => prev.map((o) => (o._id === orderId ? { ...o, ...updatedOrder, userId: o.userId, user: o.user } : o)));
+      if (selectedOrder?._id === orderId) {
+        setSelectedOrder((prev) => ({ ...prev, ...updatedOrder, userId: prev.userId, user: prev.user }));
       }
     } catch (err) {
       setError(err.message);
@@ -79,159 +84,103 @@ const AdminOrdersPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const filteredOrders = orders.filter((order) => {
-    const matchesSearch = order.userId?.username?.toLowerCase().includes(searchTerm.toLowerCase()) || order.user?.username?.toLowerCase().includes(searchTerm.toLowerCase()) || order._id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || order.orderStatus === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const term = searchTerm.toLowerCase();
+      const matchesSearch = order.userId?.username?.toLowerCase().includes(term) || order.user?.username?.toLowerCase().includes(term) || order._id.toLowerCase().includes(term);
+      const matchesStatus = statusFilter === "all" || order.orderStatus === statusFilter;
+      return matchesSearch && matchesStatus;
     });
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
-
-
-  const getUserData = (order) => {
-
-    const user = order.userId || order.user;
-    return {
-      username: user?.username || "N/A",
-      email: user?.email || "N/A",
-    };
-  };
+  }, [orders, searchTerm, statusFilter]);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="flex gap-4">
+          <Skeleton className="h-11 flex-1 max-w-md rounded-xl" />
+          <Skeleton className="h-11 w-40 rounded-xl" />
+        </div>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-6 bg-white rounded-xl p-5 border border-gray-100">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-6 w-24 rounded-full" />
+            <Skeleton className="h-8 w-28 rounded-lg" />
+          </div>
+        ))}
       </div>
     );
   }
 
   if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <div className="flex">
-          <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
-          <p className="text-red-700">Error: {error}</p>
-        </div>
-      </div>
-    );
+    return <div className="bg-red-50 border border-red-200 rounded-xl px-5 py-4 text-red-700 text-sm font-medium">Error: {error}</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 p-6 space-y-10">
- 
-      <div className="backdrop-blur-md bg-white/80 rounded-3xl p-8 shadow-xl border border-white/20">
-        <div className="text-center">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent mb-4 tracking-tight">Order Management</h1>
-          <p className="text-slate-600 text-lg font-medium">Manage and track all customer orders with style</p>
-          <div className="w-24 h-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mx-auto mt-4"></div>
-        </div>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Order Management</h1>
+        <p className="text-sm text-gray-500 mt-1">{orders.length} total orders</p>
       </div>
 
-  
-      <div className="backdrop-blur-md bg-white/90 rounded-3xl p-8 shadow-xl border border-white/20">
-        <div className="flex flex-col md:flex-row gap-6">
-
-          <div className="flex-1">
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none transition-colors duration-300 group-focus-within:text-purple-500">
-                <Search className="h-5 w-5 text-slate-400 group-focus-within:text-purple-500" />
-              </div>
-              <input type="text" placeholder="Search by customer name or order ID..." className="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 text-lg placeholder-slate-400 shadow-sm hover:shadow-md" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-            </div>
-          </div>
-
-     
-          <div className="md:w-56">
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full px-6 py-4 bg-white border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 text-lg font-medium shadow-sm hover:shadow-md">
-              <option value="all">All Statuses</option>
-              {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <input type="text" placeholder="Search by customer or order ID..." className="flex-1 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-900/10">
+          <option value="all">All Statuses</option>
+          {STATUS_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-white/50">
+      {/* Table */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full">
-            <thead className="bg-gradient-to-r from-slate-50 to-slate-100">
-              <tr>
-                <th className="px-8 py-6 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Order ID</th>
-                <th className="px-8 py-6 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Customer</th>
-                <th className="px-8 py-6 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Date</th>
-                <th className="px-8 py-6 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Total</th>
-                <th className="px-8 py-6 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Status</th>
-                <th className="px-8 py-6 text-left text-sm font-bold text-slate-700 uppercase tracking-wider">Actions</th>
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Order</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white">
-              {filteredOrders.map((order, index) => {
-                const statusInfo = getStatusInfo(order.orderStatus);
-                const StatusIcon = statusInfo.icon;
+            <tbody>
+              {filteredOrders.map((order) => {
                 const userData = getUserData(order);
-
                 return (
-                  <tr key={order._id} className={`group transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 ${index !== filteredOrders.length - 1 ? "border-b border-slate-100" : ""}`}>
-                    <td className="px-8 py-6">
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div className="text-sm font-mono font-bold text-slate-900 bg-slate-100 px-3 py-1 rounded-lg">#{order._id.slice(-8).toUpperCase()}</div>
-                      </div>
+                  <tr key={order._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className="text-xs font-mono font-semibold text-gray-900 bg-gray-100 px-2 py-1 rounded">#{order._id.slice(-8).toUpperCase()}</span>
                     </td>
-                    <td className="px-8 py-6">
-                      <div className="flex flex-col">
-                        <div className="text-sm font-semibold text-slate-900 group-hover:text-purple-700 transition-colors duration-300">{userData.username}</div>
-                        <div className="text-sm text-slate-500">{userData.email}</div>
-                      </div>
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-medium text-gray-900">{userData.username}</p>
+                      <p className="text-xs text-gray-500">{userData.email}</p>
                     </td>
-                    <td className="px-8 py-6">
-                      <div className="text-sm font-medium text-slate-700">{formatDate(order.createdAt)}</div>
+                    <td className="px-6 py-4 text-sm text-gray-600">{formatDate(order.createdAt)}</td>
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">{formatCurrency(order.totalAmount)}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(order.orderStatus)}`}>{getStatusLabel(order.orderStatus)}</span>
                     </td>
-                    <td className="px-8 py-6">
-                      <div className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">{formatCurrency(order.totalAmount)}</div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-md backdrop-blur-sm ${statusInfo.color} transition-all duration-300 hover:scale-105`}>
-                        <StatusIcon className="w-4 h-4 mr-2" />
-                        {statusInfo.label}
-                      </span>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex items-center space-x-3">
-    
-                        <select value={order.orderStatus} onChange={(e) => updateOrderStatus(order._id, e.target.value)} disabled={updatingOrderId === order._id} className="text-sm border-2 border-slate-200 rounded-xl px-3 py-2 focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 font-medium shadow-sm hover:shadow-md disabled:opacity-50">
-                          {statusOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <select value={order.orderStatus} onChange={(e) => updateOrderStatus(order._id, e.target.value)} disabled={updatingOrderId === order._id} className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-900/10 disabled:opacity-50">
+                          {STATUS_OPTIONS.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
                             </option>
                           ))}
                         </select>
-
-                        <button onClick={() => setSelectedOrder(order)} className="group/btn relative p-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl shadow-lg hover:shadow-xl hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-110">
-                          <Eye className="w-4 h-4 transition-transform duration-300 group-hover/btn:scale-110" />
-                          <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                        <button onClick={() => setSelectedOrder(order)} className="px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors">
+                          View
                         </button>
                       </div>
                     </td>
@@ -243,114 +192,64 @@ const AdminOrdersPage = () => {
         </div>
 
         {filteredOrders.length === 0 && (
-          <div className="text-center py-20">
-            <div className="inline-flex items-center justify-center w-28 h-28 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full mb-8">
-              <Package className="w-14 h-14 text-slate-400" />
-            </div>
-            <h3 className="text-2xl font-bold text-slate-600 mb-3">No orders found</h3>
-            <p className="text-slate-500 text-lg max-w-md mx-auto">{searchTerm || statusFilter !== "all" ? "Try adjusting your search or filter criteria to find what you're looking for." : "No orders have been placed yet. Once customers start ordering, they'll appear here."}</p>
+          <div className="text-center py-16">
+            <p className="text-gray-500 font-medium">No orders found</p>
+            <p className="text-sm text-gray-400 mt-1">{searchTerm || statusFilter !== "all" ? "Try adjusting your search or filter" : "No orders have been placed yet"}</p>
           </div>
         )}
       </div>
 
-
+      {/* Order Detail Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
-  
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-8 py-6 flex justify-between items-center">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[85vh] overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <div>
-                <h3 className="text-2xl font-bold text-white">Order Details</h3>
-                <div className="text-purple-100 font-mono text-lg">#{selectedOrder._id.slice(-8).toUpperCase()}</div>
+                <h3 className="text-lg font-bold text-gray-900">Order Details</h3>
+                <p className="text-xs font-mono text-gray-500">#{selectedOrder._id.slice(-8).toUpperCase()}</p>
               </div>
-              <button onClick={() => setSelectedOrder(null)} className="p-2 text-white hover:bg-white/20 rounded-xl transition-all duration-300 transform hover:scale-110">
-                <X className="w-6 h-6" />
+              <button onClick={() => setSelectedOrder(null)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
               </button>
             </div>
 
-
-            <div className="p-8 overflow-y-auto max-h-[calc(90vh-120px)]">
- 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
-                  <h4 className="text-lg font-bold text-blue-800 mb-4 flex items-center">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                    Customer Information
-                  </h4>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-blue-600 font-medium">Name:</span>
-                      <span className="text-blue-900 font-semibold">{getUserData(selectedOrder).username}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-blue-600 font-medium">Email:</span>
-                      <span className="text-blue-900 font-semibold">{getUserData(selectedOrder).email}</span>
-                    </div>
-                  </div>
+            <div className="p-6 overflow-y-auto max-h-[calc(85vh-80px)] space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-xs font-medium text-gray-500 mb-2">Customer</p>
+                  <p className="text-sm font-semibold text-gray-900">{getUserData(selectedOrder).username}</p>
+                  <p className="text-xs text-gray-500">{getUserData(selectedOrder).email}</p>
                 </div>
-
-
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
-                  <h4 className="text-lg font-bold text-green-800 mb-4 flex items-center">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                    Order Information
-                  </h4>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-green-600 font-medium">Date:</span>
-                      <span className="text-green-900 font-semibold">{formatDate(selectedOrder.createdAt)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-green-600 font-medium">Total:</span>
-                      <span className="text-green-900 font-bold text-xl">{formatCurrency(selectedOrder.totalAmount)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-green-600 font-medium">Status:</span>
-                      <span className="text-green-900 font-semibold">{getStatusInfo(selectedOrder.orderStatus).label}</span>
-                    </div>
-                  </div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-xs font-medium text-gray-500 mb-2">Order Info</p>
+                  <p className="text-sm font-semibold text-gray-900">{formatCurrency(selectedOrder.totalAmount)}</p>
+                  <p className="text-xs text-gray-500">{formatDate(selectedOrder.createdAt)}</p>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 border border-slate-200">
-                <h4 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
-                  <div className="w-2 h-2 bg-slate-500 rounded-full mr-2"></div>
-                  Order Items
-                </h4>
-                <div className="space-y-4">
-                  {selectedOrder.products?.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center p-4 bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                      <div className="flex-1">
-                        <p className="text-lg font-bold text-slate-900 mb-1">{item.productId?.name || "Product"}</p>
-                        <div className="flex items-center space-x-4">
-                          <span className="text-sm text-slate-600 bg-slate-100 px-3 py-1 rounded-full font-medium">Qty: {item.quantity}</span>
-                          <span className="text-sm text-slate-600 bg-slate-100 px-3 py-1 rounded-full font-medium">Unit: {formatCurrency(item.price)}</span>
-                        </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900 mb-3">Items</p>
+                <div className="space-y-3">
+                  {selectedOrder.products?.map((item, i) => (
+                    <div key={i} className="flex justify-between items-center bg-gray-50 rounded-xl px-4 py-3">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{item.productId?.name || "Product"}</p>
+                        <p className="text-xs text-gray-500">
+                          Qty: {item.quantity} x {formatCurrency(item.price)}
+                        </p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{formatCurrency(item.price * item.quantity)}</p>
-                      </div>
+                      <p className="text-sm font-semibold text-gray-900">{formatCurrency(item.price * item.quantity)}</p>
                     </div>
-                  )) || (
-                    <div className="text-center py-8">
-                      <div className="w-16 h-16 bg-slate-200 rounded-full mx-auto mb-4 flex items-center justify-center">
-                        <Package className="w-8 h-8 text-slate-400" />
-                      </div>
-                      <p className="text-slate-500 text-lg">No items found in this order</p>
-                    </div>
-                  )}
+                  ))}
                 </div>
+              </div>
 
-
-                {selectedOrder.products && selectedOrder.products.length > 0 && (
-                  <div className="mt-6 pt-6 border-t border-slate-200">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xl font-bold text-slate-800">Order Total:</span>
-                      <span className="text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{formatCurrency(selectedOrder.totalAmount)}</span>
-                    </div>
-                  </div>
-                )}
+              <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                <span className="text-sm font-semibold text-gray-900">Total</span>
+                <span className="text-lg font-bold text-gray-900">{formatCurrency(selectedOrder.totalAmount)}</span>
               </div>
             </div>
           </div>
@@ -358,6 +257,6 @@ const AdminOrdersPage = () => {
       )}
     </div>
   );
-};
+}
 
 export default AdminOrdersPage;

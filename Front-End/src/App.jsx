@@ -4,7 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Notification from "./components/Notification";
 import ProtectedRoute from "./components/ProtectedRoute";
-import LoadingSkeleton from "./components/LoadingSkeleton";
+import PageLoader from "./components/PageLoader";
 
 // Lazy-loaded pages — only downloaded when the user navigates to them
 const HomePage = lazy(() => import("./components/HomePage"));
@@ -31,7 +31,7 @@ function App() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Suspense fallback={<LoadingSkeleton />}>
+        <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<HomePage />} />
