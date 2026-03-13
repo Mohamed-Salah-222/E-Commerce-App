@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useNotification } from "../../context/NotificationContext";
-import Skeleton from "./Skeleton";
+import Skeleton from "../layout/Skeleton";
 
 function CheckoutPage() {
   const [address, setAddress] = useState({ street: "", city: "", postalCode: "", country: "" });
