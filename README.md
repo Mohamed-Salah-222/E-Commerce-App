@@ -1,96 +1,124 @@
-# 🛍️ Full-Stack E-commerce Platform
+# E-Commerce Platform
 
-A complete, feature-rich e-commerce application built with **React.js** and **Node.js/Express**, featuring modern UI components, secure backend APIs, and comprehensive shopping functionality.
+A full-stack e-commerce application built with the MERN stack. Supports user authentication, product browsing, cart management, Stripe payments, order tracking, and admin dashboard.
 
-**Status:** ✅ Complete  
-**Live Demo:** 🌐 [Click here to try it out](https://e-commerce-app-neon-eight.vercel.app/)
+## Tech Stack
 
----
+**Frontend:** React, React Router, Tailwind CSS  
+**Backend:** Node.js, Express.js  
+**Database:** MongoDB (Mongoose ODM)  
+**Payments:** Stripe (PaymentIntent API)  
+**Auth:** JWT, Passport.js (Google OAuth 2.0)  
+**Storage:** Cloudinary (image uploads)  
+**Email:** Nodemailer (Gmail SMTP)
 
-## ✨ Features
+## Features
 
-### 🎨 Frontend (React.js)
+### Customer
+- Email/password registration with 6-digit email verification
+- Google OAuth login
+- Password reset via tokenized email links
+- Product browsing with search and sort (price, newest)
+- Product variants (sizes and colors)
+- Persistent server-side cart with promo code support
+- Stripe checkout with real-time payment status
+- Order history with status tracking
 
-- 🔐 **Secure User Authentication** – Registration, login, password recovery, and Google OAuth.
-- 🛡 **Role-Based Access Control** – User & admin dashboards with protected routes and role-specific features.
-- 🛒 **Dynamic Product Catalog** – Advanced search, filtering, and detailed product pages.
-- 🛍 **Shopping Cart Management** – Add/remove items, adjust quantities, and see real-time price updates.
-- 💳 **Checkout & Payment Processing** – Secure payment flow with integrated payment gateway.
-- 📱 **Responsive Design** – Optimized for desktop, tablet, and mobile.
+### Admin
+- Product management (create, edit, delete) with Cloudinary image uploads
+- Order management with status updates (processing, shipped, delivered, cancelled)
+- User management with role promotion
 
-### ⚙️ Backend (Node.js / Express)
+## Project Structure
 
-- ⚙ **RESTful API Architecture** – Clean, modular, and scalable API endpoints for products, users, orders, and authentication.
-- 🔐 **JWT Authentication & Authorization** – Protects routes and enforces role-based access.
-- 🗄 **MongoDB Database** – Stores products, orders, and user data with Mongoose ODM.
-- 📦 **Order & Inventory Management** – Updates stock levels in real-time when orders are placed.
-- 📧 **Email Services** – Account verification and password reset using email.
-- 🛠 **Admin Functionality** – Create, update, and delete products; manage orders and users.
-- 💳 **Payment Integration** – Secure server-side payment gateway handling.
+```
+Front-End/src/
+  components/
+    layout/      Navbar, AuthLayout, PageLoader, Skeleton
+    ui/          FormInput, FormAlert, SubmitButton, Notification
+    auth/        Login, Register, Verify, ForgotPassword, ResetPassword
+    products/    HomePage, ProductList, ProductCard, ProductDetailPage
+    cart/        CartPage, CheckoutPage, PaymentPopup
+    orders/      OrderHistoryPage
+    profile/     UserProfilePage
+    admin/       AdminOrdersPage, AdminProductsPage, AdminUsersPage
+  context/       AuthContext, NotificationContext
 
----
+Back-End/
+  config/        Passport Google OAuth setup
+  controllers/   Auth, Cart, Order, Product, User, Admin, Payment
+  middleware/     JWT auth, admin validation, cart provisioning, validators
+  models/        User, Product, Cart, Order
+  routes/        Route definitions
+  services/      Email service (verification, password reset)
+```
 
-## 🎯 User Experience
+## Getting Started
 
-- 🔄 **Seamless Navigation** – Client-side routing with React Router.
-- ⚡ **Real-time Updates** – Live cart, order status notifications, and inventory updates.
-- 🌐 **Social Login Integration** – Google OAuth for quick signup/login.
-- 👤 **Profile Management** – Update personal information & account settings.
-- 🔒 **Protected Routes** – Secure access for users & admins.
+### Prerequisites
+- Node.js 18+
+- MongoDB Atlas account
+- Stripe account
+- Cloudinary account
+- Google Cloud Console project (for OAuth)
 
----
+### Environment Variables
 
-## 🛠 Tech Stack
+**Backend (.env)**
+```
+PORT=3000
+MONGODB_URI=
+JWT_SECRET=
+STRIPE_SECRET_KEY=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URL=
+GMAIL_APP_PASSWORD=
+FRONTEND_URL=
+```
 
-| Layer                | Technologies                                  |
-| -------------------- | --------------------------------------------- |
-| **Frontend**         | React.js, React Router, JSX                   |
-| **Backend**          | Node.js, Express.js, MongoDB, Mongoose        |
-| **Authentication**   | JWT, Google OAuth, Email Verification         |
-| **State Management** | React Context API, Hooks                      |
-| **UI / Styling**     | Tailwind CSS                                  |
-| **Payment**          | Integrated Payment Gateway                    |
-| **Tools**            | Git, npm, Vercel (Frontend), Render (Backend) |
+**Frontend (.env)**
+```
+VITE_API_URL=http://localhost:3000
+VITE_STRIPE_PUBLISHABLE_KEY=
+VITE_ADMIN_EMAIL=
+VITE_ADMIN_PASSWORD=
+VITE_TEST_USER_EMAIL=
+VITE_TEST_USER_PASSWORD=
+```
 
----
+### Installation
 
-## 📁 Component Structure
+```bash
+# Backend
+cd Back-End
+npm install
+npm start
 
-The application is built with **19+ reusable React components** and a structured backend, including:
+# Frontend
+cd Front-End
+npm install
+npm run dev
+```
 
-- **User Management** – Registration, Login, Profile, Password Recovery
-- **Shopping Experience** – Product Catalog, Cart, Checkout, Order History
-- **Admin Dashboard** – Product, Order, & User Management
-- **Authentication** – Protected Routes, Email Verification, OAuth Callbacks
-- **UI Components** – Notifications, Payment Modals, Product Cards
-- **Backend Modules** – Auth Middleware, Product Controller, Order Controller, Payment Handler
+## API Overview
 
----
+| Route Group | Base Path | Auth | Description |
+|------------|-----------|------|-------------|
+| Auth | /api/auth | Mixed | Register, login, verify, password reset, Google OAuth |
+| Products | /api/products | Public | Browse and search products |
+| Cart | /api/cart | JWT | Cart CRUD and promo codes |
+| Orders | /api/orders | JWT | Create and view orders |
+| Payments | /api | JWT | Stripe payment intent and confirmation |
+| Admin | /api/admin | JWT + Admin | Product, order, and user management |
 
-## 💳 Test Payments (Stripe)
+## Key Technical Decisions
 
-This project uses **Stripe** for secure payment processing.  
-You can test the checkout flow using **Stripe's test mode** — no real money will be charged.
-
-**Test Card Details (for testing only):**
-
-- **Card Number:** `4242 4242 4242 4242`
-- **Expiration Date:** Any future date
-- **CVC:** Any 3 digits
-- **ZIP Code:** Any ZIP
-
-**Steps to test payment:**
-
-1. Add items to your cart.
-2. Go to checkout.
-3. Enter the test card details above.
-4. Use any valid billing info (ignored in test mode).
-5. Complete the payment — the order will process as if successful.
-
-> 💡 Stripe also provides other test card numbers for scenarios like failed payments and authentication requirements.
-
----
-
-<div align="center">
-🚀 **Ready to explore the full-stack e-commerce experience!**
-</div>
+- **Server-side payment calculation:** Cart totals are computed from the database, never trusted from the frontend, preventing amount tampering.
+- **Self-invalidating reset tokens:** Password reset JWTs are signed with the current password hash, so changing the password automatically invalidates unused tokens.
+- **Database-validated admin access:** Admin status is checked via DB lookup per request rather than JWT claims, ensuring immediate effect when roles change.
+- **Immediate JWT rendering:** On page load, the user is set from the decoded JWT instantly while fresh data loads in the background, eliminating cold-start blank screens.
+- **Feature-based architecture:** Components organized by domain (auth, cart, admin) rather than type for better discoverability and co-location.
